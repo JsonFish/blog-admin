@@ -1,9 +1,11 @@
 <script setup lang="ts">
 defineOptions({
-  name: "Welcome"
+  name: "Home"
 });
 </script>
 
 <template>
-  <h1>Pure-Admin-Thin（非国际化版本）</h1>
+  <el-card>
+    <h1>主页</h1>
+  </el-card>
 </template>

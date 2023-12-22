@@ -3,6 +3,7 @@ import { http } from "@/utils/http";
 export interface UserResult {
   code: number;
   data: {
+    token: string;
     /** 用户名 */
     username: string;
     /** 当前登陆用户的角色 */
@@ -29,15 +30,21 @@ export type RefreshTokenResult = {
   };
 };
 
+/** 获取图片验证码 */
+export const getCaptcha = () => {
+  return http.request<any>("get", "/user/captcha");
+};
+
 /** 登录 */
 export const getLogin = (data?: object) => {
-  return http.request<UserResult>("post", "/api/user/login", { data });
+  return http.request<UserResult>("post", "/user/login", { data });
 };
 
 /** 刷新token */
 export const refreshTokenApi = (data?: object) => {
   return http.request<RefreshTokenResult>("post", "/refreshToken", { data });
 };
+
 export const testapi = () => {
   return http.request("get", "/userinfo/getinfo");
 };

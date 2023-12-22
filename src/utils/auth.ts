@@ -10,7 +10,7 @@ export interface DataInfo<T> {
   /** 用于调用刷新accessToken的接口时所需的token */
   refreshToken: string;
   /** 用户名 */
-  username?: string;
+  email?: string;
   /** 当前登陆用户的角色 */
   roles?: Array<string>;
 }
@@ -55,12 +55,12 @@ export function setToken(data: DataInfo<Date>) {
     });
   }
 
-  if (data.username && data.roles) {
-    const { username, roles } = data;
-    setSessionKey(username, roles);
+  if (data.email && data.roles) {
+    const { email, roles } = data;
+    setSessionKey(email, roles);
   } else {
     const username =
-      storageSession().getItem<DataInfo<number>>(sessionKey)?.username ?? "";
+      storageSession().getItem<DataInfo<number>>(sessionKey)?.email ?? "";
     const roles =
       storageSession().getItem<DataInfo<number>>(sessionKey)?.roles ?? [];
     setSessionKey(username, roles);

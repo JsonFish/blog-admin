@@ -3,7 +3,7 @@ import Motion from "./utils/motion";
 import { useRouter } from "vue-router";
 import { message } from "@/utils/message";
 import { loginRules } from "./utils/rule";
-import { useNav } from "@/layout/hooks/useNav";
+// import { useNav } from "@/layout/hooks/useNav";
 import type { FormInstance } from "element-plus";
 import { useLayout } from "@/layout/hooks/useLayout";
 // import { useUserStoreHook } from "@/store/modules/user";
@@ -20,11 +20,13 @@ import { useDataThemeChange } from "@/layout/hooks/useDataThemeChange";
 
 import dayIcon from "@/assets/svg/day.svg?component";
 import darkIcon from "@/assets/svg/dark.svg?component";
+import emailIcon from "@/assets/svg/email.svg?component";
+import captchaIcon from "@/assets/svg/captcha.svg?component";
 import Lock from "@iconify-icons/ri/lock-fill";
-import User from "@iconify-icons/ri/user-3-fill";
+// import User from "@iconify-icons/ri/user-3-fill";
 // import { useUserMedia } from "@vueuse/core";
-import { useUserStore, useUserStoreHook } from "@/store/modules/user";
-
+import { useUserStore } from "@/store/modules/user";
+import { getCaptcha } from "@/api/user";
 defineOptions({
   name: "Login"
 });
@@ -37,49 +39,55 @@ initStorage();
 
 const { dataTheme, dataThemeChange } = useDataThemeChange();
 dataThemeChange();
-const { title } = useNav();
-
+// const { title } = useNav();
+// 图片验证码 svg格式
+const captchaSvg = ref<SVGAElement>();
+// 后端返回来的验证码
+const captcha = ref<string>("");
 const ruleForm = reactive({
   email: "test@qq.com",
-  password: "admin123"
+  password: "admin123",
+  captcha: ""
 });
-
+// 登录
 const onLogin = async (formEl: FormInstance | undefined) => {
   loading.value = true;
   if (!formEl) return;
   await formEl.validate(async (valid, fields) => {
     // const result: any = await useUserStoreHook().loginByUsername(ruleForm);
     // console.log(result);
-
+    // console.log(fields);
     if (valid) {
-      useUserStoreHook()
-        .loginByEmail(ruleForm)
-        .then(res => {
-          console.log(res);
-          // 静态路由模式
-          if (res.code == 200) {
-            usePermissionStoreHook().handleWholeMenus([]);
-            addPathMatch();
-            setToken({
-              username: "admin"
-              // roles: ["admin"],
-              // accessToken: "eyJhbGciOiJIUzUxMiJ9.admin"
-            } as any);
-            router.push("/");
-            message("登录成功", { type: "success" });
-          }
-        });
-
-      // 动态路由
-      // useUserStoreHook()
-      //   .loginByUsername(ruleForm)
-      //   .then(res => {
-      //     if (res) {
-      //       // 获取后端路由
-      //       router.push(getTopMenu(true).path);
-      //       message("登录成功", { type: "success" });
-      //     }
-      //   });
+      // 判断用户输入的验证码是否正确
+      if (ruleForm.captcha.toLowerCase() == captcha.value.toLowerCase()) {
+        useUserStore()
+          .loginByEmail(ruleForm)
+          .then(
+            res => {
+              // 静态路由模式
+              if (res.code == 200) {
+                usePermissionStoreHook().handleWholeMenus([]);
+                addPathMatch();
+                setToken({
+                  accessToken: res.data.token
+                } as any);
+                router.push("/");
+                message("登录成功", { type: "success" });
+              }
+            },
+            reason => {
+              message(reason.message, { type: "error" });
+              getCaptchaImg();
+              loading.value = false;
+              return fields;
+            }
+          );
+      } else {
+        message("验证码错误", { type: "error" });
+        ruleForm.captcha = "";
+        getCaptchaImg();
+        loading.value = false;
+      }
     } else {
       loading.value = false;
       return fields;
@@ -94,8 +102,16 @@ function onkeypress({ code }: KeyboardEvent) {
   }
 }
 
+// 获取图片验证码
+const getCaptchaImg = async () => {
+  const result = await getCaptcha();
+  captcha.value = result.data.captcha;
+  captchaSvg.value = result.data.img;
+};
+
 onMounted(() => {
   window.document.addEventListener("keypress", onkeypress);
+  getCaptchaImg();
 });
 
 onBeforeUnmount(() => {
@@ -124,7 +140,8 @@ onBeforeUnmount(() => {
         <div class="login-form">
           <avatar class="avatar" />
           <Motion>
-            <h2 class="outline-none">{{ title }}</h2>
+            <!-- <h2 class="outline-none">{{ title }}</h2> -->
+            <h2 class="outline-none">JSON's blogadmin</h2>
           </Motion>
 
           <el-form
@@ -138,7 +155,7 @@ onBeforeUnmount(() => {
                 :rules="[
                   {
                     required: true,
-                    message: '请输入账号',
+                    message: '请输入邮箱',
                     trigger: 'blur'
                   }
                 ]"
@@ -147,8 +164,8 @@ onBeforeUnmount(() => {
                 <el-input
                   clearable
                   v-model="ruleForm.email"
-                  placeholder="账号"
-                  :prefix-icon="useRenderIcon(User)"
+                  placeholder="邮箱"
+                  :prefix-icon="useRenderIcon(emailIcon)"
                 />
               </el-form-item>
             </Motion>
@@ -161,6 +178,32 @@ onBeforeUnmount(() => {
                   v-model="ruleForm.password"
                   placeholder="密码"
                   :prefix-icon="useRenderIcon(Lock)"
+                />
+              </el-form-item>
+            </Motion>
+
+            <Motion :delay="200">
+              <el-form-item
+                :rules="[
+                  {
+                    required: true,
+                    message: '请输入验证码',
+                    trigger: 'blur'
+                  }
+                ]"
+                prop="captcha"
+              >
+                <el-input
+                  clearable
+                  v-model="ruleForm.captcha"
+                  placeholder="验证码"
+                  :prefix-icon="useRenderIcon(captchaIcon)"
+                  style="width: 65%"
+                />
+                <div
+                  style="width: 30%; height: 100%; margin-left: 2%"
+                  v-html="captchaSvg"
+                  @click="getCaptchaImg"
                 />
               </el-form-item>
             </Motion>
