@@ -1,8 +1,12 @@
+import Article from "@iconify-icons/ri/article-fill";
+import Document from "@iconify-icons/ep/document";
+import specialColumn from "@iconify-icons/ri/layout-2-line";
+import Tag from "@iconify-icons/ri/bookmark-3-line";
 export default {
   path: "/article",
   redirect: "/article/manage",
   meta: {
-    icon: "informationLine",
+    icon: Article,
     title: "文章",
     // showLink: false,
     rank: 1
@@ -10,26 +14,29 @@ export default {
   children: [
     {
       path: "/article/manage",
-      name: "",
-      component: () => import("@/views/error/403.vue"),
+      name: "articleManage",
+      component: () => import("@/views/article/articleManage/index.vue"),
       meta: {
-        title: "文章管理"
+        title: "文章管理",
+        icon: Document
       }
     },
     {
-      path: "/error/404",
-      name: "404",
-      component: () => import("@/views/error/404.vue"),
+      path: "/article/sort",
+      name: "specialColumn",
+      component: () => import("@/views/article/specialColumn/index.vue"),
       meta: {
-        title: "发布文章"
+        title: "专栏管理",
+        icon: specialColumn
       }
     },
     {
-      path: "/error/500",
-      name: "500",
-      component: () => import("@/views/error/500.vue"),
+      path: "/article/tag",
+      name: "tagManage",
+      component: () => import("@/views/article/tagManage/index.vue"),
       meta: {
-        title: "500"
+        title: "标签管理",
+        icon: Tag
       }
     }
   ]

@@ -6,7 +6,7 @@ import { isAllEmpty } from "@pureadmin/utils";
 import { ref, nextTick, computed } from "vue";
 import { useNav } from "@/layout/hooks/useNav";
 import { usePermissionStoreHook } from "@/store/modules/permission";
-import LogoutCircleRLine from "@iconify-icons/ri/logout-circle-r-line";
+import Logout from "@iconify-icons/ri/logout-box-line";
 import Setting from "@iconify-icons/ri/settings-3-line";
 
 const menuRef = ref();
@@ -17,7 +17,7 @@ const {
   logout,
   backTopMenu,
   onPanel,
-  username,
+  email,
   userAvatar,
   avatarsStyle
 } = useNav();
@@ -63,13 +63,13 @@ nextTick(() => {
       <el-dropdown trigger="click">
         <span class="el-dropdown-link navbar-bg-hover">
           <img :src="userAvatar" :style="avatarsStyle" />
-          <p v-if="username" class="dark:text-white">{{ username }}</p>
+          <p v-if="email" class="dark:text-white">{{ email }}</p>
         </span>
         <template #dropdown>
           <el-dropdown-menu class="logout">
             <el-dropdown-item @click="logout">
-              <IconifyIconOffline :icon="LogoutCircleRLine" />
-              退出系统
+              <IconifyIconOffline :icon="Logout" />
+              退出登录
             </el-dropdown-item>
           </el-dropdown-menu>
         </template>

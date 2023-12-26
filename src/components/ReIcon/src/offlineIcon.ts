@@ -1,3 +1,4 @@
+// 全局图标注册
 import { addIcon } from "@iconify/vue/dist/offline";
 
 /**
@@ -12,3 +13,7 @@ import Lollipop from "@iconify-icons/ep/lollipop";
 addIcon("homeFilled", HomeFilled);
 addIcon("informationLine", InformationLine);
 addIcon("lollipop", Lollipop);
+// addIcon("Document", Document);
+// addIcon("article", article);
+// addIcon("Tag", Tag);
+// addIcon("specialColumn", specialColumn);

@@ -20,10 +20,9 @@ import { useDataThemeChange } from "@/layout/hooks/useDataThemeChange";
 
 import dayIcon from "@/assets/svg/day.svg?component";
 import darkIcon from "@/assets/svg/dark.svg?component";
-import emailIcon from "@/assets/svg/email.svg?component";
 import captchaIcon from "@/assets/svg/captcha.svg?component";
 import Lock from "@iconify-icons/ri/lock-fill";
-// import User from "@iconify-icons/ri/user-3-fill";
+import Email from "@iconify-icons/ri/mail-line";
 // import { useUserMedia } from "@vueuse/core";
 import { useUserStore } from "@/store/modules/user";
 import { getCaptcha } from "@/api/user";
@@ -104,7 +103,7 @@ function onkeypress({ code }: KeyboardEvent) {
 
 // 获取图片验证码
 const getCaptchaImg = async () => {
-  const result = await getCaptcha();
+  const result: any = await getCaptcha();
   captcha.value = result.data.captcha;
   captchaSvg.value = result.data.img;
 };
@@ -165,7 +164,7 @@ onBeforeUnmount(() => {
                   clearable
                   v-model="ruleForm.email"
                   placeholder="邮箱"
-                  :prefix-icon="useRenderIcon(emailIcon)"
+                  :prefix-icon="useRenderIcon(Email)"
                 />
               </el-form-item>
             </Motion>
