@@ -59,8 +59,6 @@ const onLogin = async (formEl: FormInstance | undefined) => {
     if (valid) {
       // 判断用户输入的验证码是否正确
       if (ruleForm.captcha.toLowerCase() == captcha.value.toLowerCase()) {
-        console.log(ruleForm);
-
         useUserStore()
           .loginByEmail(ruleForm)
           .then(
