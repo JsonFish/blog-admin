@@ -24,7 +24,7 @@ const defaultConfig: AxiosRequestConfig = {
     "Content-Type": "application/json",
     "X-Requested-With": "XMLHttpRequest"
   },
-  baseURL: "/api", // 基础路径上会携带/api
+  baseURL: "/api", // 向 /api 路径发请求(会被vite拦截跨域)
   // 数组格式参数序列化（https://github.com/axios/axios/issues/5142）
   paramsSerializer: {
     serialize: stringify as unknown as CustomParamsSerializer
@@ -81,7 +81,9 @@ class PureHttp {
           : new Promise(resolve => {
               const data = getToken();
               if (data) {
+                // 获取当前时间
                 const now = new Date().getTime();
+                // 获取accessToken过期时间
                 const expired = parseInt(data.expires) - now <= 0;
                 if (expired) {
                   if (!PureHttp.isRefreshing) {

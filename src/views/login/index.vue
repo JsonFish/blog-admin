@@ -30,7 +30,7 @@ defineOptions({
   name: "Login"
 });
 const router = useRouter();
-const loading = ref(false);
+const loading = ref<boolean>(false);
 const ruleFormRef = ref<FormInstance>();
 
 const { initStorage } = useLayout();
@@ -59,6 +59,8 @@ const onLogin = async (formEl: FormInstance | undefined) => {
     if (valid) {
       // 判断用户输入的验证码是否正确
       if (ruleForm.captcha.toLowerCase() == captcha.value.toLowerCase()) {
+        console.log(ruleForm);
+
         useUserStore()
           .loginByEmail(ruleForm)
           .then(
