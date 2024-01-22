@@ -3,11 +3,10 @@ import { http } from "@/utils/http";
 export interface UserResult {
   code: number;
   data: {
-    token: string;
     /** 用户名 */
     username: string;
     /** 当前登陆用户的角色 */
-    roles: Array<string>;
+    role: number;
     /** `token` */
     accessToken: string;
     /** 用于调用刷新`accessToken`的接口时所需的`token` */
@@ -32,7 +31,7 @@ export type RefreshTokenResult = {
 
 /** 获取图片验证码 */
 export const getCaptcha = () => {
-  return http.request<UserResult>("get", "/user/captcha");
+  return http.request<UserResult>("get", "/other/imageCaptcha");
 };
 
 /** 登录 */
@@ -44,7 +43,7 @@ export const getLogin = (data?: object) => {
 export const refreshTokenApi = (data?: object) => {
   return http.request<RefreshTokenResult>("post", "/refreshToken", { data });
 };
-
+// 测试
 export const testapi = () => {
   return http.request("get", "/userinfo/getinfo");
 };

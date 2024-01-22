@@ -14,7 +14,7 @@ export const useUserStore = defineStore("user", {
     // 用户名
     email: storageSession().getItem<DataInfo<number>>(sessionKey)?.email ?? "",
     // 页面级别权限
-    roles: storageSession().getItem<DataInfo<number>>(sessionKey)?.roles ?? []
+    role: storageSession().getItem<DataInfo<number>>(sessionKey)?.role ?? 0
   }),
   actions: {
     /** 存储用户名 */
@@ -22,15 +22,17 @@ export const useUserStore = defineStore("user", {
       this.email = email;
     },
     /** 存储角色 */
-    SET_ROLES(roles: Array<string>) {
-      this.roles = roles;
+    SET_ROLES(role: number) {
+      this.role = role;
     },
     /** 登入 */
     async loginByEmail(data: any) {
       return new Promise<UserResult>((resolve, reject) => {
         getLogin(data)
           .then(reponse => {
+            console.log(reponse);
             if (reponse.code == 200) {
+              setToken(reponse.data);
               resolve(reponse);
             } else {
               reject(reponse);
@@ -44,7 +46,7 @@ export const useUserStore = defineStore("user", {
     /** 退出登录（不调用接口） */
     logOut() {
       this.email = "";
-      // this.roles = [];
+      this.role = 0;
       removeToken();
       useMultiTagsStoreHook().handleTags("equal", [...routerArrays]);
       resetRouter();

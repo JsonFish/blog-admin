@@ -12,7 +12,7 @@ export interface DataInfo<T> {
   /** 用户名 */
   email?: string;
   /** 当前登陆用户的角色 */
-  roles?: Array<string>;
+  role?: number;
 }
 
 export const sessionKey = "user-info";
@@ -44,26 +44,26 @@ export function setToken(data: DataInfo<Date>) {
       })
     : Cookies.set(TokenKey, cookieString);
 
-  function setSessionKey(username: string, roles: Array<string>) {
+  function setSessionKey(username: string, role: number) {
     useUserStoreHook().SET_USERNAME(username);
-    useUserStoreHook().SET_ROLES(roles);
+    useUserStoreHook().SET_ROLES(role);
     storageSession().setItem(sessionKey, {
       refreshToken,
       expires,
       username,
-      roles
+      role
     });
   }
 
-  if (data.email && data.roles) {
-    const { email, roles } = data;
-    setSessionKey(email, roles);
+  if (data.email && data.role) {
+    const { email, role } = data;
+    setSessionKey(email, role);
   } else {
     const username =
       storageSession().getItem<DataInfo<number>>(sessionKey)?.email ?? "";
-    const roles =
-      storageSession().getItem<DataInfo<number>>(sessionKey)?.roles ?? [];
-    setSessionKey(username, roles);
+    const role =
+      storageSession().getItem<DataInfo<number>>(sessionKey)?.role ?? [];
+    setSessionKey(username, role);
   }
 }
 
