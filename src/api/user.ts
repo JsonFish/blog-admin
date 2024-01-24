@@ -43,6 +43,7 @@ export const getLogin = (data?: object) => {
 export const refreshTokenApi = (data?: object) => {
   return http.request<RefreshTokenResult>("post", "/refreshToken", { data });
 };
+
 // 测试
 export const testapi = () => {
   return http.request("get", "/userinfo/getinfo");

@@ -29,13 +29,13 @@ export const useUserStore = defineStore("user", {
     async loginByEmail(data: any) {
       return new Promise<UserResult>((resolve, reject) => {
         getLogin(data)
-          .then(reponse => {
-            console.log(reponse);
-            if (reponse.code == 200) {
-              setToken(reponse.data);
-              resolve(reponse);
+          .then(response => {
+            console.log(response);
+            if (response.code == 200) {
+              setToken(response.data);
+              resolve(response);
             } else {
-              reject(reponse);
+              reject(response);
             }
           })
           .catch(error => {

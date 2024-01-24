@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { initRouter } from "@/router/utils";
+// import { initRouter } from "@/router/utils";
 import { storageSession } from "@pureadmin/utils";
 import { type CSSProperties, ref, computed } from "vue";
 import { useUserStoreHook } from "@/store/modules/user";
@@ -16,7 +16,7 @@ const elStyle = computed((): CSSProperties => {
   };
 });
 
-const username = ref(useUserStoreHook()?.username);
+const username = ref(useUserStoreHook()?.email);
 
 const options = [
   {
@@ -33,10 +33,10 @@ function onChange() {
   useUserStoreHook()
     .loginByEmail({ username: username.value, password: "admin123" })
     .then(res => {
-      if (res.success) {
+      if (res.code) {
         storageSession().removeItem("async-routes");
         usePermissionStoreHook().clearAllCachePage();
-        initRouter();
+        // initRouter();
       }
     });
 }

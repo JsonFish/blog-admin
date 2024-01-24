@@ -22,9 +22,9 @@ export default {
       }
     },
     {
-      path: "/article/sort",
-      name: "specialColumn",
-      component: () => import("@/views/article/specialColumn/index.vue"),
+      path: "/article/category",
+      name: "category",
+      component: () => import("@/views/article/categoryManage/index.vue"),
       meta: {
         title: "专栏管理",
         icon: specialColumn
