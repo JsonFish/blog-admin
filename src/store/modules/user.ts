@@ -30,7 +30,6 @@ export const useUserStore = defineStore("user", {
       return new Promise<UserResult>((resolve, reject) => {
         getLogin(data)
           .then(response => {
-            console.log(response);
             if (response.code == 200) {
               setToken(response.data);
               resolve(response);

@@ -79,7 +79,7 @@ const onLogin = async (formEl: FormInstance | undefined) => {
             message("登录成功", { type: "success" });
           },
           reason => {
-            message(reason.errorMessage, { type: "error" });
+            message(reason.message, { type: "error" });
             getCaptchaImg();
             loading.value = false;
             return fields;
@@ -187,11 +187,11 @@ onBeforeUnmount(() => {
                   v-model="loginForm.code"
                   placeholder="验证码"
                   :prefix-icon="useRenderIcon(captchaIcon)"
-                  style="width: 60%"
+                  style="width: 65%"
                 />
 
                 <div
-                  style="width: 35%; height: 100%; margin-left: 5%"
+                  style="width: 30%; height: 100%; margin-left: 5%"
                   @click="getCaptchaImg"
                 >
                   <img

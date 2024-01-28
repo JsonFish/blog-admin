@@ -1,21 +1,17 @@
 import { http } from "@/utils/http";
-/** 获取所有标签 */
-export const getTagList = (queryParams: object) => {
-  return http.request<any>("get", "/tag/tagList", { queryParams });
+/** 获取标签列表 */
+export const getTagList = (params: object) => {
+  return http.request<any>("get", "/tag", { params });
 };
-/** 添加标签 */
+/** 新增标签 */
 export const addTag = (data: object) => {
-  return http.request<any>("post", "/tag/addTag", { data });
+  return http.request<any>("post", "/tag", { data });
+};
+/** 修改标签 */
+export const updateTag = (data: object) => {
+  return http.request<any>("put", "/tag", { data });
 };
 /** 删除标签 */
-export const deleteTagInfo = (id: number) => {
-  return http.request<any>("post", "/tag/deleteTag", { id });
-};
-/** 获取标签详细信息 */
-export const getTagInfo = (id: number) => {
-  return http.request<any>("get", "/tag/getTag", { id });
-};
-/** 更新标签信息 */
-export const updateTag = (data: object) => {
-  return http.request<any>("post", "/tag/updateTag", { data });
+export const deleteTag = (data: number) => {
+  return http.request<any>("delete", `/tag`, { data });
 };
