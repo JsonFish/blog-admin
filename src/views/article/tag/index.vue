@@ -49,7 +49,7 @@
         <el-table-column
           prop="tagName"
           align="center"
-          label="标签名"
+          label="标签名称"
           width="200"
         />
         <el-table-column
