@@ -31,7 +31,7 @@ export type RefreshTokenResult = {
 
 /** 获取图片验证码 */
 export const getCaptcha = () => {
-  return http.request<UserResult>("get", "/other/imageCaptcha");
+  return http.request<UserResult>("get", "/user/imageCaptcha");
 };
 
 /** 登录 */

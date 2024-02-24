@@ -69,7 +69,7 @@ declare global {
   /**
    *  继承 `@pureadmin/table` 的 `TableColumns` ，方便全局直接调用
    */
-  interface TableColumnList extends Array<TableColumns> {}
+  interface TableColumnList extends Array<TableColumns> { }
 
   /**
    * 对应 `public/serverConfig.json` 文件的类型声明
@@ -156,5 +156,10 @@ declare global {
     $echarts: ECharts;
     $storage: ResponsiveStorage;
     $config: ServerConfigs;
+  }
+  interface BaseResponse<T = object> {
+    code: number,
+    data: T,
+    message: string
   }
 }

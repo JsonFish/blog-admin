@@ -14,7 +14,7 @@ export default {
   children: [
     {
       path: "/article/manage",
-      name: "articleManage",
+      name: "ArticleManage",
       component: () => import("@/views/article/addOrEditArticle/index.vue"),
       meta: {
         title: "文章管理",
@@ -23,7 +23,7 @@ export default {
     },
     {
       path: "/article/category",
-      name: "category",
+      name: "Category",
       component: () => import("@/views/article/category/index.vue"),
       meta: {
         title: "专栏管理",
@@ -32,7 +32,7 @@ export default {
     },
     {
       path: "/article/tag",
-      name: "tagManage",
+      name: "Tag",
       component: () => import("@/views/article/tag/index.vue"),
       meta: {
         title: "标签管理",

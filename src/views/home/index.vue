@@ -6,6 +6,8 @@ defineOptions({
 
 <template>
   <el-card>
-    <h1>主页</h1>
+    <template #header>
+      <div>首页</div>
+    </template>
   </el-card>
 </template>

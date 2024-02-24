@@ -38,10 +38,8 @@
         >
       </el-row>
       <el-table
-        :loading="true"
         :data="categoryList"
         border
-        height="450"
         @selection-change="handleSelectionChange"
       >
         <el-table-column type="selection" width="50" />
@@ -167,6 +165,9 @@ import {
 } from "@/api/category";
 import { message } from "@/utils/message";
 import { type FormInstance } from "element-plus";
+defineOptions({
+  name: "Category"
+});
 
 const queryParams = reactive<QueryParams>({
   categoryName: "",

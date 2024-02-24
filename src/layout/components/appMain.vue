@@ -78,7 +78,7 @@ const transitionMain = defineComponent({
     :class="[props.fixedHeader ? 'app-main' : 'app-main-nofixed-header']"
     :style="getSectionStyle"
   >
-    <router-view style="height: 100%">
+    <router-view style="height: 85vh">
       <template #default="{ Component, route }">
         <el-scrollbar v-if="props.fixedHeader">
           <el-backtop title="回到顶部" target=".app-main .el-scrollbar__wrap">
