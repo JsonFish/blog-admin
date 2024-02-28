@@ -73,7 +73,8 @@ const onLogin = async (formEl: FormInstance | undefined) => {
             usePermissionStoreHook().handleWholeMenus([]);
             addPathMatch();
             setToken({
-              accessToken: res.data.accessToken
+              accessToken: res.data.accessToken,
+              refreshToken: res.data.refreshToken
             } as any);
             router.push("/");
             message("登录成功", { type: "success" });

@@ -25,7 +25,9 @@ export function getToken(): DataInfo<number> {
     ? JSON.parse(Cookies.get(TokenKey))
     : storageSession().getItem(sessionKey);
 }
-
+export function getTokens(key: string) {
+  return localStorage.getItem(key);
+}
 /**
  * @description 设置`token`以及一些必要信息并采用无感刷新`token`方案
  * 无感刷新：后端返回`accessToken`（访问接口使用的`token`）、`refreshToken`（用于调用刷新`accessToken`的接口时所需的`token`，`refreshToken`的过期时间（比如30天）应大于`accessToken`的过期时间（比如2小时））、`expires`（`accessToken`的过期时间）
@@ -35,14 +37,16 @@ export function getToken(): DataInfo<number> {
 export function setToken(data: DataInfo<Date>) {
   let expires = 0;
   const { accessToken, refreshToken } = data;
+  localStorage.setItem("accessToken", accessToken);
+  localStorage.setItem("refreshToken", refreshToken);
   expires = new Date(data.expires).getTime(); // 如果后端直接设置时间戳，将此处代码改为expires = data.expires，然后把上面的DataInfo<Date>改成DataInfo<number>即可
-  const cookieString = JSON.stringify({ accessToken, expires });
+  // const cookieString = JSON.stringify({ accessToken, expires });
 
-  expires > 0
-    ? Cookies.set(TokenKey, cookieString, {
-        expires: (expires - Date.now()) / 86400000
-      })
-    : Cookies.set(TokenKey, cookieString);
+  // expires > 0
+  //   ? Cookies.set(TokenKey, cookieString, {
+  //     expires: (expires - Date.now()) / 86400000
+  //   })
+  //   : Cookies.set(TokenKey, cookieString);
 
   function setSessionKey(username: string, role: number) {
     useUserStoreHook().SET_USERNAME(username);
@@ -66,7 +70,14 @@ export function setToken(data: DataInfo<Date>) {
     setSessionKey(username, role);
   }
 }
-
+// export function setToken(data) {
+//   if (data.accessToken) {
+//     localStorage.setItem("accessToken", data.accessToken);
+//   }
+//   if (data.refreshToken) {
+//     localStorage.setItem("refreshToken", data.refreshToken);
+//   }
+// }
 /** 删除`token`以及key值为`user-info`的session信息 */
 export function removeToken() {
   Cookies.remove(TokenKey);

@@ -8,7 +8,7 @@ import { getLogin, refreshTokenApi } from "@/api/user";
 import { UserResult, RefreshTokenResult } from "@/api/user";
 import { useMultiTagsStoreHook } from "@/store/modules/multiTags";
 import { type DataInfo, setToken, removeToken, sessionKey } from "@/utils/auth";
-
+import { message } from "@/utils/message";
 export const useUserStore = defineStore("user", {
   state: (): userType => ({
     // 用户名
@@ -52,13 +52,33 @@ export const useUserStore = defineStore("user", {
       router.push("/login");
     },
     /** 刷新`token` */
-    async handRefreshToken(data) {
+    async handRefreshToken() {
       return new Promise<RefreshTokenResult>((resolve, reject) => {
-        refreshTokenApi(data)
-          .then(data => {
-            if (data) {
-              setToken(data.data);
-              resolve(data);
+        const refreshToken = localStorage.getItem("refreshToken");
+        // 没有 refershToken 直接退出,重新登录
+        if (!refreshToken) {
+          message("身份认证失败，请重新登录", { type: "error" });
+          this.logOut();
+          return;
+        }
+        console.log("刷新token");
+        refreshTokenApi({ refreshToken })
+          .then(response => {
+            // 刷新成功
+            if (response.code == 200) {
+              // 存储token
+              setToken({
+                accessToken: response.data.accessToken,
+                refreshToken: response.data.refreshToken
+              } as any);
+              resolve(response);
+            }
+            // refreshToken 过期 重新登录
+            else if (response.code == 401) {
+              message("身份认证过期, 请重新登录！", { type: "error" });
+              this.logOut();
+            } else {
+              reject(response);
             }
           })
           .catch(error => {
