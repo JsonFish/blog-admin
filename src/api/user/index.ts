@@ -27,6 +27,7 @@ export type RefreshTokenResult = {
     // /** `accessToken`的过期时间（格式'xxxx/xx/xx xx:xx:xx'） */
     // expires: Date;
   };
+  message: string;
 };
 
 /** 获取图片验证码 */

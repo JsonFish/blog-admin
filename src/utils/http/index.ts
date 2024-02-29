@@ -65,6 +65,10 @@ class PureHttp {
   private httpInterceptorsRequest(): void {
     PureHttp.axiosInstance.interceptors.request.use(
       async (config: PureHttpRequestConfig): Promise<any> => {
+        // if (!getTokens("accessToken")) {
+        //   console.log("accessToken", getTokens("accessToken"));
+        //   return config;
+        // }
         config.headers["Authorization"] = formatToken(getTokens("accessToken"));
         // 开启进度条动画
         NProgress.start();
@@ -140,8 +144,11 @@ class PureHttp {
           PureHttp.initConfig.beforeResponseCallback(response);
           return response.data;
         }
-        console.log("response.data", response.data);
-
+        // refershToken 过期
+        if (response.data.code == 401) {
+          message(response.data.message, { type: "error" });
+          useUserStore().logOut();
+        }
         return response.data;
       },
       // 错误响应拦截
@@ -156,13 +163,12 @@ class PureHttp {
 
           if (!PureHttp.isRefreshing) {
             PureHttp.isRefreshing = true;
-            console.log("token过期");
             return useUserStore()
               .handRefreshToken()
               .then(
                 // token刷新成功
                 response => {
-                  console.log("刷新成功");
+                  console.log("token 刷新成功");
                   const token = response.data.accessToken;
                   // 设置 Authorization 字段
                   PureHttp.axiosInstance.defaults.headers.common.Authorization =
@@ -174,9 +180,10 @@ class PureHttp {
                   //重新执行当前未执行成功的请求并返回
                   return instance.request(config);
                 },
-                // token刷新失败
+                // token刷新失败 退出登录
                 reason => {
-                  return message(reason.message, { type: "error" });
+                  PureHttp.isRefreshing = false;
+                  message(reason.message, { type: "error" });
                 }
               )
               .catch(err => {
@@ -184,9 +191,7 @@ class PureHttp {
                 throw err;
               })
               .finally(() => {
-                if (!PureHttp.requests.length) {
-                  PureHttp.isRefreshing = false;
-                }
+                PureHttp.isRefreshing = false;
               });
           } else {
             // 如果正在刷新token，将刷新token过程中的发起的请求存储起来

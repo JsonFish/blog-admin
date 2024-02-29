@@ -48,7 +48,7 @@ export const useUserStore = defineStore("user", {
       this.role = 0;
       removeToken();
       useMultiTagsStoreHook().handleTags("equal", [...routerArrays]);
-      resetRouter();
+      // resetRouter();
       router.push("/login");
     },
     /** 刷新`token` */
@@ -61,7 +61,6 @@ export const useUserStore = defineStore("user", {
           this.logOut();
           return;
         }
-        console.log("刷新token");
         refreshTokenApi({ refreshToken })
           .then(response => {
             // 刷新成功
@@ -72,17 +71,12 @@ export const useUserStore = defineStore("user", {
                 refreshToken: response.data.refreshToken
               } as any);
               resolve(response);
-            }
-            // refreshToken 过期 重新登录
-            else if (response.code == 401) {
-              message("身份认证过期, 请重新登录！", { type: "error" });
-              this.logOut();
             } else {
               reject(response);
             }
           })
           .catch(error => {
-            reject(error);
+            throw error;
           });
       });
     }
