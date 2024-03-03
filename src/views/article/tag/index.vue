@@ -231,6 +231,7 @@ const submit = (formEl: FormInstance | undefined) => {
           tagForm.id = "";
         });
       } else {
+        delete tagForm.id;
         addTag(tagForm).then(response => {
           if (response.code == 200) {
             message("添加成功", { type: "success" });
