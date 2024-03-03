@@ -24,7 +24,7 @@ import Lock from "@iconify-icons/ri/lock-fill";
 import Email from "@iconify-icons/ri/mail-line";
 // import { useUserMedia } from "@vueuse/core";
 import { useUserStore } from "@/store/modules/user";
-import { getCaptcha } from "@/api/user";
+import { getCaptcha } from "@/api/login";
 defineOptions({
   name: "Login"
 });
