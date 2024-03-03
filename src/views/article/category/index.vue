@@ -38,11 +38,12 @@
         >
       </el-row>
       <el-table
+        v-loading="loading"
         :data="categoryList"
         border
         @selection-change="handleSelectionChange"
       >
-        <el-table-column type="selection" width="50" />
+        <el-table-column type="selection" width="50" align="center" />
         <el-table-column type="index" align="center" label="序号" width="60" />
         <el-table-column
           prop="categoryName"
@@ -50,6 +51,19 @@
           label="分类名称"
           width="200"
         />
+        <el-table-column
+          prop="categoryImage"
+          label="分类封面"
+          align="center"
+          width="200"
+        >
+          <template v-slot="scope">
+            <el-image
+              style="width: 50px; height: 50px; margin-bottom: -4px"
+              :src="scope.row.categoryImage"
+            />
+          </template>
+        </el-table-column>
         <el-table-column
           prop="create_time"
           align="center"
@@ -103,7 +117,7 @@
         />
       </template>
     </el-card>
-
+    <!-- dialog -->
     <el-dialog
       :close-on-click-modal="false"
       append-to-body
@@ -132,6 +146,21 @@
             clearable
           />
         </el-form-item>
+        <el-form-item
+          label="图片"
+          :rules="[
+            {
+              required: true,
+              message: '请上传封面图片!'
+            }
+          ]"
+          prop="categoryImage"
+        >
+          <ImageUpload
+            @upload-success="getUrl"
+            :imageUrl="categoryForm.categoryImage"
+          />
+        </el-form-item>
       </el-form>
       <template #footer>
         <el-button @click="cancel">取消</el-button>
@@ -151,6 +180,7 @@ import Delete from "@iconify-icons/ep/delete";
 import EditPen from "@iconify-icons/ep/edit-pen";
 import Warning from "@iconify-icons/ep/warning";
 import { useRenderIcon } from "@/components/ReIcon/src/hooks";
+import ImageUpload from "@/components/ReUpload/index.vue";
 import { onMounted, ref, reactive, nextTick } from "vue";
 import type {
   CategoryInfo,
@@ -178,9 +208,11 @@ const queryFormRef = ref<FormInstance>();
 const dialogFormRef = ref<FormInstance>();
 const categoryForm = reactive<CategoryForm>({
   id: "",
-  categoryName: ""
+  categoryName: "",
+  categoryImage: ""
 });
 const total = ref<number>(0);
+const loading = ref<boolean>(false);
 const dialogVisible = ref<boolean>(false);
 
 const categoryList = ref<CategoryInfo[]>();
@@ -192,9 +224,11 @@ onMounted(() => {
 
 // 获取category数据
 const getCategoryInfo = () => {
+  loading.value = true;
   getCategoryList(queryParams).then(response => {
     categoryList.value = response.data.categoryList;
     total.value = response.data.total;
+    loading.value = false;
   });
 };
 // 重置按钮回调
@@ -218,7 +252,10 @@ const updateBtn = (row: CategoryInfo) => {
     categoryForm.categoryName = row.categoryName;
   });
 };
-
+// 上传图片成功，获取图片url
+const getUrl = imageUrl => {
+  categoryForm.categoryImage = imageUrl;
+};
 // dialog确定按钮回调
 const submit = (formEl: FormInstance | undefined) => {
   if (!formEl) return;

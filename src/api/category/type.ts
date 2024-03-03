@@ -26,4 +26,5 @@ export interface QueryParams {
 export interface CategoryForm {
   id: number[] | number | string;
   categoryName: string;
+  categoryImage: string;
 }

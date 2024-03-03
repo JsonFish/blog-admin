@@ -2,7 +2,7 @@ import { defineStore } from "pinia";
 import { store } from "@/store";
 import { userType } from "./types";
 import { routerArrays } from "@/layout/types";
-import { router, resetRouter } from "@/router";
+import { router } from "@/router";
 import { storageSession } from "@pureadmin/utils";
 import { getLogin, refreshTokenApi } from "@/api/user";
 import { UserResult, RefreshTokenResult } from "@/api/user";
@@ -31,7 +31,7 @@ export const useUserStore = defineStore("user", {
         getLogin(data)
           .then(response => {
             if (response.code == 200) {
-              setToken(response.data);
+              // setToken(response.data);
               resolve(response);
             } else {
               reject(response);

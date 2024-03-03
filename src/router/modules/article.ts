@@ -26,7 +26,7 @@ export default {
       name: "Category",
       component: () => import("@/views/article/category/index.vue"),
       meta: {
-        title: "专栏管理",
+        title: "分类管理",
         icon: specialColumn
       }
     },

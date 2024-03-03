@@ -1,102 +1,109 @@
 <template>
-  <el-card>
-    <template #header>
-      <div>标签管理</div>
-    </template>
-    <el-row>
-      <el-form :model="queryParams" :inline="true" ref="queryFormRef">
-        <el-form-item label="标签名称">
-          <el-input
-            v-model="queryParams.tagName"
-            placeholder="请输入标签名称"
-            prop="tagName"
-          />
-        </el-form-item>
-      </el-form>
-      <el-button
-        type="primary"
-        :icon="useRenderIcon(Search)"
-        @click="getTagInfo"
-        >搜索</el-button
+  <div>
+    <el-card>
+      <template #header>
+        <div>标签管理</div>
+      </template>
+      <el-row>
+        <el-form :model="queryParams" :inline="true" ref="queryFormRef">
+          <el-form-item label="标签名称">
+            <el-input
+              v-model="queryParams.tagName"
+              placeholder="请输入标签名称"
+              prop="tagName"
+            />
+          </el-form-item>
+        </el-form>
+        <el-button
+          type="primary"
+          :icon="useRenderIcon(Search)"
+          @click="getTagInfo"
+          >搜索</el-button
+        >
+        <el-button type="info" :icon="useRenderIcon(Refresh)" @click="reset"
+          >重置</el-button
+        >
+        <el-button
+          type="primary"
+          :icon="useRenderIcon(Plus)"
+          @click="dialogVisible = true"
+          >新增</el-button
+        >
+        <el-button
+          :disabled="idList.length > 0 ? false : true"
+          type="danger"
+          :icon="useRenderIcon(Delete)"
+          @click="deleteTagBtn"
+          >批量删除</el-button
+        >
+      </el-row>
+      <el-table
+        v-loading="loading"
+        :data="tagList"
+        border
+        @selection-change="handleSelectionChange"
       >
-      <el-button type="info" :icon="useRenderIcon(Refresh)" @click="reset"
-        >重置</el-button
-      >
-      <el-button
-        type="primary"
-        :icon="useRenderIcon(Plus)"
-        @click="dialogVisible = true"
-        >新增</el-button
-      >
-      <el-button
-        :disabled="idList.length > 0 ? false : true"
-        type="danger"
-        :icon="useRenderIcon(Delete)"
-        @click="deleteTagBtn"
-        >批量删除</el-button
-      >
-    </el-row>
-    <el-table :data="tagList" border @selection-change="handleSelectionChange">
-      <el-table-column type="selection" width="50" />
-      <el-table-column type="index" align="center" label="序号" width="60" />
-      <el-table-column
-        prop="tagName"
-        align="center"
-        label="标签名称"
-        width="200"
-      />
-      <el-table-column
-        prop="create_time"
-        align="center"
-        label="创建时间"
-        width="250"
-      />
-      <el-table-column
-        prop="update_time"
-        align="center"
-        label="更新时间"
-        width="300"
-      />
-      <el-table-column prop="address" label="操作">
-        <template #default="scope">
-          <div class="btnClass">
-            <el-button
-              link
-              type="primary"
-              @click="updateBtn(scope.row)"
-              :icon="useRenderIcon(EditPen)"
-              >修改</el-button
-            >
-            <el-popconfirm
-              width="220"
-              :title="`是否删除标签 ${scope.row.tagName} ?`"
-              :icon="useRenderIcon(Warning)"
-              icon-color="#f56c6c"
-              @confirm="deleteTagBtn(scope.row)"
-            >
-              <template #reference>
-                <el-button link type="danger" :icon="useRenderIcon(Delete)"
-                  >删除</el-button
-                >
-              </template>
-            </el-popconfirm>
-          </div>
-        </template>
-      </el-table-column>
-    </el-table>
-    <template #footer>
-      <el-pagination
-        v-model:current-page="queryParams.currentPage"
-        v-model:page-size="queryParams.pageSize"
-        :page-sizes="[10, 15, 20]"
-        :small="true"
-        background
-        layout="->,total, sizes, prev, pager, next,jumper"
-        :total="total"
-        @size-change="getTagInfo"
-        @current-change="getTagInfo"
-      />
-    </template>
+        <el-table-column type="selection" width="50" />
+        <el-table-column type="index" align="center" label="序号" width="60" />
+        <el-table-column
+          prop="tagName"
+          align="center"
+          label="标签名称"
+          width="200"
+        />
+        <el-table-column
+          prop="create_time"
+          align="center"
+          label="创建时间"
+          width="250"
+        />
+        <el-table-column
+          prop="update_time"
+          align="center"
+          label="更新时间"
+          width="300"
+        />
+        <el-table-column prop="address" label="操作">
+          <template #default="scope">
+            <div class="btnClass">
+              <el-button
+                link
+                type="primary"
+                @click="updateBtn(scope.row)"
+                :icon="useRenderIcon(EditPen)"
+                >修改</el-button
+              >
+              <el-popconfirm
+                width="220"
+                :title="`是否删除标签 ${scope.row.tagName} ?`"
+                :icon="useRenderIcon(Warning)"
+                icon-color="#f56c6c"
+                @confirm="deleteTagBtn(scope.row)"
+              >
+                <template #reference>
+                  <el-button link type="danger" :icon="useRenderIcon(Delete)"
+                    >删除</el-button
+                  >
+                </template>
+              </el-popconfirm>
+            </div>
+          </template>
+        </el-table-column>
+      </el-table>
+      <template #footer>
+        <el-pagination
+          v-model:current-page="queryParams.currentPage"
+          v-model:page-size="queryParams.pageSize"
+          :page-sizes="[10, 15, 20]"
+          :small="true"
+          background
+          layout="->,total, sizes, prev, pager, next,jumper"
+          :total="total"
+          @size-change="getTagInfo"
+          @current-change="getTagInfo"
+        />
+      </template>
+    </el-card>
     <el-dialog
       :close-on-click-modal="false"
       append-to-body
@@ -133,7 +140,7 @@
         </el-button>
       </template>
     </el-dialog>
-  </el-card>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -165,6 +172,7 @@ const tagForm = reactive<TagForm>({
   tagName: ""
 });
 const total = ref<number>(0);
+const loading = ref<boolean>(false);
 const dialogVisible = ref<boolean>(false);
 // tag列表
 const tagList = ref<TagInfo[]>();
@@ -176,9 +184,11 @@ onMounted(() => {
 
 // 获取tag数据
 const getTagInfo = () => {
+  loading.value = true;
   getTagList(queryParams).then(response => {
     tagList.value = response.data.tagList;
     total.value = response.data.total;
+    loading.value = false;
   });
 };
 // 重置按钮回调

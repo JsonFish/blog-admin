@@ -149,6 +149,12 @@ class PureHttp {
           message(response.data.message, { type: "error" });
           useUserStore().logOut();
         }
+        // 无权限操作数据
+        if (response.data.code == 403) {
+          message(response.data.message, { type: "error" });
+          return;
+        }
+
         return response.data;
       },
       // 错误响应拦截
