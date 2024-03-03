@@ -1,6 +1,6 @@
 import { http } from "@/utils/http";
 
-export interface UserResult {
+export interface LoginResult {
   code: number;
   data: {
     /** 用户名 */
@@ -24,25 +24,23 @@ export type RefreshTokenResult = {
     accessToken: string;
     /** 用于调用刷新`accessToken`的接口时所需的`token` */
     refreshToken: string;
-    // /** `accessToken`的过期时间（格式'xxxx/xx/xx xx:xx:xx'） */
-    // expires: Date;
   };
   message: string;
 };
 
 /** 获取图片验证码 */
 export const getCaptcha = () => {
-  return http.get<any, UserResult>("/user/imageCaptcha");
+  return http.get<any, BaseResponse>("/get/imageCaptcha");
 };
 
 /** 登录 */
 export const getLogin = (data: object) => {
-  return http.post<any, UserResult>("/user/login", { data });
+  return http.post<any, LoginResult>("/login", { data });
 };
 
 /** 刷新token */
 export const refreshTokenApi = (data: object) => {
-  return http.request<RefreshTokenResult>("post", "/user/refreshToken", {
+  return http.request<RefreshTokenResult>("post", "/refreshToken", {
     data
   });
 };

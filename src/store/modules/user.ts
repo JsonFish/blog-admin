@@ -4,8 +4,8 @@ import { userType } from "./types";
 import { routerArrays } from "@/layout/types";
 import { router } from "@/router";
 import { storageSession } from "@pureadmin/utils";
-import { getLogin, refreshTokenApi } from "@/api/user";
-import { UserResult, RefreshTokenResult } from "@/api/user";
+import { getLogin, refreshTokenApi } from "@/api/login";
+import { LoginResult, RefreshTokenResult } from "@/api/login";
 import { useMultiTagsStoreHook } from "@/store/modules/multiTags";
 import { type DataInfo, setToken, removeToken, sessionKey } from "@/utils/auth";
 import { message } from "@/utils/message";
@@ -27,7 +27,7 @@ export const useUserStore = defineStore("user", {
     },
     /** 登入 */
     async loginByEmail(data: any) {
-      return new Promise<UserResult>((resolve, reject) => {
+      return new Promise<LoginResult>((resolve, reject) => {
         getLogin(data)
           .then(response => {
             if (response.code == 200) {

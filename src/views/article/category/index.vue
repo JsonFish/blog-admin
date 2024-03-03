@@ -44,7 +44,7 @@
         @selection-change="handleSelectionChange"
       >
         <el-table-column type="selection" width="50" align="center" />
-        <el-table-column type="index" align="center" label="序号" width="60" />
+        <el-table-column type="index" align="center" label="#" width="60" />
         <el-table-column
           prop="categoryName"
           align="center"
@@ -53,7 +53,7 @@
         />
         <el-table-column
           prop="categoryImage"
-          label="分类封面"
+          label="封面"
           align="center"
           width="200"
         >

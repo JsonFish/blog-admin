@@ -44,7 +44,7 @@
         @selection-change="handleSelectionChange"
       >
         <el-table-column type="selection" width="50" />
-        <el-table-column type="index" align="center" label="序号" width="60" />
+        <el-table-column type="index" align="center" label="#" width="60" />
         <el-table-column
           prop="tagName"
           align="center"
