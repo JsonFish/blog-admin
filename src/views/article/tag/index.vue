@@ -256,6 +256,7 @@ const handleSelectionChange = (tagList: TagInfo[]) => {
 };
 // 删除按钮回调
 const deleteTagBtn = (row: TagInfo | any) => {
+  delete tagForm.tagName;
   if (row.id) {
     idList.value = [];
     idList.value.push(row.id);

@@ -274,7 +274,7 @@ const submit = (formEl: FormInstance | undefined) => {
           categoryForm.id = "";
         });
       } else {
-        console.log(categoryForm);
+        delete categoryForm.id;
         addCategory(categoryForm).then(response => {
           if (response.code == 200) {
             message("添加成功", { type: "success" });
@@ -299,6 +299,7 @@ const handleSelectionChange = (categoryList: CategoryInfo[]) => {
 };
 // 删除按钮回调
 const deleteBtn = (row: CategoryInfo | any) => {
+  delete categoryForm.categoryName;
   if (row.id) {
     idList.value = [];
     idList.value.push(row.id);
