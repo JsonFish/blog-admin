@@ -15,6 +15,7 @@
           </el-form-item>
         </el-form>
         <el-button
+          :disabled="!queryParams.categoryName"
           type="primary"
           :icon="useRenderIcon(Search)"
           @click="getCategoryInfo"
@@ -88,7 +89,7 @@
               >
               <el-popconfirm
                 width="220"
-                :title="`是否删除分类 ${scope.row.categoryName} ?`"
+                :title="`是否删除分类: ${scope.row.categoryName} ?`"
                 :icon="useRenderIcon(Warning)"
                 icon-color="#f56c6c"
                 @confirm="deleteBtn(scope.row)"

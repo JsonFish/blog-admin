@@ -15,6 +15,7 @@
           </el-form-item>
         </el-form>
         <el-button
+          :disabled="!queryParams.tagName"
           type="primary"
           :icon="useRenderIcon(Search)"
           @click="getTagInfo"

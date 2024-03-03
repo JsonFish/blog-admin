@@ -6,18 +6,19 @@
       </template>
       <el-row>
         <el-form :model="queryParams" :inline="true" ref="queryFormRef">
-          <el-form-item label="标签名称">
+          <el-form-item label="用户名">
             <el-input
               v-model="queryParams.username"
-              placeholder="请输入标签名称"
+              placeholder="请输入用户名"
               prop="tagName"
             />
           </el-form-item>
         </el-form>
         <el-button
+          :disabled="!queryParams.username"
           type="primary"
           :icon="useRenderIcon(Search)"
-          @click="getTagInfo"
+          @click="getUsers"
           >搜索</el-button
         >
         <el-button type="info" :icon="useRenderIcon(Refresh)" @click="reset"
@@ -33,10 +34,82 @@
           :disabled="idList.length > 0 ? false : true"
           type="danger"
           :icon="useRenderIcon(Delete)"
-          @click="deleteTagBtn"
+          @click="deleteUserBtn"
           >批量删除</el-button
         >
       </el-row>
+      <el-table
+        v-loading="loading"
+        :data="userList"
+        border
+        @selection-change="handleSelectionChange"
+      >
+        <el-table-column type="selection" width="50" />
+        <el-table-column type="index" align="center" label="#" width="60" />
+        <el-table-column
+          prop="username"
+          align="center"
+          label="用户名"
+          width="150"
+        />
+        <el-table-column prop="avatar" label="头像" align="center" width="200">
+          <template v-slot="scope">
+            <el-image
+              style="width: 50px; height: 50px; margin-bottom: -4px"
+              :src="scope.row.avatar"
+            />
+          </template>
+        </el-table-column>
+        <el-table-column prop="email" align="center" label="邮箱" width="200" />
+        <el-table-column prop="role" align="center" label="角色" />
+        <el-table-column
+          prop="create_time"
+          align="center"
+          label="创建时间"
+          width="200"
+        />
+        <el-table-column
+          prop="update_time"
+          align="center"
+          label="更新时间"
+          width="200"
+        />
+        <el-table-column prop="address" label="操作">
+          <template #default="scope">
+            <div class="btnClass">
+              <el-button link type="primary" :icon="useRenderIcon(EditPen)"
+                >修改</el-button
+              >
+              <el-popconfirm
+                width="220"
+                :title="`是否删除用户: ${scope.row.username} ?`"
+                :icon="useRenderIcon(Warning)"
+                icon-color="#f56c6c"
+                @confirm="deleteUserBtn(scope.row)"
+              >
+                <template #reference>
+                  <el-button link type="danger" :icon="useRenderIcon(Delete)"
+                    >删除</el-button
+                  >
+                </template>
+              </el-popconfirm>
+            </div>
+          </template>
+        </el-table-column>
+      </el-table>
+      <template #footer>
+        <el-pagination
+          v-model:current-page="queryParams.currentPage"
+          v-model:page-size="queryParams.pageSize"
+          :page-sizes="[10, 15, 20]"
+          :small="true"
+          background
+          layout="->,total, sizes, prev, pager, next,jumper"
+          :total="total"
+          @size-change="getUsers"
+          @current-change="getUsers"
+        />
+      </template>
     </el-card>
   </div>
 </template>
@@ -53,16 +126,68 @@ import Delete from "@iconify-icons/ep/delete";
 import EditPen from "@iconify-icons/ep/edit-pen";
 import Warning from "@iconify-icons/ep/warning";
 import { useRenderIcon } from "@/components/ReIcon/src/hooks";
-
-import { reactive } from "vue";
-
+import { getUserList, deleteUser } from "@/api/user";
+import { ref, reactive, onMounted } from "vue";
+import { message } from "@/utils/message";
+const dialogVisible = ref<boolean>(false);
+// 查询参数
 const queryParams = reactive<any>({
   username: "",
   currentPage: 1,
   pageSize: 10
 });
+// 表单参数
+const userForm = reactive<any>({
+  id: "",
+  username: ""
+});
+const loading = ref<boolean>(false);
+const total = ref<number>(0);
+const userList = ref([]);
+// 批量删除存储id
+const idList = ref<number[]>([]);
+onMounted(() => {
+  getUsers();
+});
+// 查询
+const getUsers = () => {
+  loading.value = true;
+  getUserList(queryParams).then(response => {
+    userList.value = response.data.userList;
+    total.value = response.data.total;
+    loading.value = false;
+  });
+};
 // 重置按钮回调
-const reset = () => {};
+const reset = () => {
+  queryParams.username = "";
+  getUsers();
+};
+// checkBox处理
+const handleSelectionChange = (userList: any) => {
+  idList.value = userList.map((userInfo: any) => {
+    return userInfo.id;
+  });
+};
+// 删除
+const deleteUserBtn = (row: any) => {
+  delete userForm.username;
+  if (row.id) {
+    idList.value = [];
+    idList.value.push(row.id);
+  }
+  userForm.id = idList.value;
+  deleteUser(userForm).then(response => {
+    if (response.code == 200) {
+      message("删除成功", { type: "success" });
+      getUsers();
+    } else {
+      message("删除失败", { type: "error" });
+    }
+  });
+  userForm.id = ""; // 重置id
+  idList.value = [];
+};
 </script>
 
 <style scoped lang="scss"></style>
