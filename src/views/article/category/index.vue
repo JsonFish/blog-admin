@@ -159,6 +159,7 @@
           <Upload
             @uploadResponse="getUrl"
             v-model:fileList="categoryImageList"
+            :fileSize="4"
           />
         </el-form-item>
       </el-form>

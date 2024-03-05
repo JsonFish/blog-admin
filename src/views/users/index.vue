@@ -24,12 +24,12 @@
         <el-button type="info" :icon="useRenderIcon(Refresh)" @click="reset"
           >重置</el-button
         >
-        <el-button
+        <!-- <el-button
           type="primary"
           :icon="useRenderIcon(Plus)"
           @click="dialogVisible = true"
           >新增</el-button
-        >
+        > -->
         <el-button
           :disabled="idList.length > 0 ? false : true"
           type="danger"
@@ -54,10 +54,7 @@
         />
         <el-table-column prop="avatar" label="头像" align="center" width="100">
           <template v-slot="scope">
-            <el-image
-              style="width: 50px; height: 50px; margin-bottom: -4px"
-              :src="scope.row.avatar"
-            />
+            <el-avatar :src="scope.row.avatar" />
           </template>
         </el-table-column>
         <el-table-column
@@ -66,7 +63,11 @@
           label="邮箱"
           min-width="200"
         />
-        <el-table-column prop="role" align="center" label="角色" />
+        <el-table-column prop="role" align="center" label="角色">
+          <template #default="scope">
+            <el-tag>{{ scope.row.role == 2 ? "超级管理员" : "用户" }}</el-tag>
+          </template>
+        </el-table-column>
         <el-table-column
           prop="create_time"
           align="center"
@@ -134,6 +135,7 @@ import { useRenderIcon } from "@/components/ReIcon/src/hooks";
 import { getUserList, deleteUser } from "@/api/user";
 import { ref, reactive, onMounted } from "vue";
 import { message } from "@/utils/message";
+// dialog
 const dialogVisible = ref<boolean>(false);
 // 查询参数
 const queryParams = reactive<any>({
