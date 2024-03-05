@@ -45,14 +45,14 @@
         @selection-change="handleSelectionChange"
       >
         <el-table-column type="selection" width="50" />
-        <el-table-column type="index" align="center" label="#" width="60" />
+        <el-table-column type="index" align="center" label="#" width="50" />
         <el-table-column
           prop="username"
           align="center"
           label="用户名"
           width="150"
         />
-        <el-table-column prop="avatar" label="头像" align="center" width="200">
+        <el-table-column prop="avatar" label="头像" align="center" width="100">
           <template v-slot="scope">
             <el-image
               style="width: 50px; height: 50px; margin-bottom: -4px"
@@ -60,7 +60,12 @@
             />
           </template>
         </el-table-column>
-        <el-table-column prop="email" align="center" label="邮箱" width="200" />
+        <el-table-column
+          prop="email"
+          align="center"
+          label="邮箱"
+          min-width="200"
+        />
         <el-table-column prop="role" align="center" label="角色" />
         <el-table-column
           prop="create_time"

@@ -60,7 +60,7 @@
         >
           <template v-slot="scope">
             <el-image
-              style="width: 50px; height: 50px; margin-bottom: -4px"
+              style="height: 50px; margin-bottom: -5px"
               :src="scope.row.categoryImage"
             />
           </template>
@@ -130,16 +130,15 @@
       <el-form :model="categoryForm" ref="dialogFormRef" label-width="100px">
         <el-form-item
           label="分类名称"
+          prop="categoryName"
           :rules="[
             {
               required: true,
               min: 2,
               max: 10,
-              message: '分类长度2-15位!',
-              trigger: 'blur'
+              message: '分类名长度2-10位 !'
             }
           ]"
-          prop="categoryName"
         >
           <el-input
             v-model="categoryForm.categoryName"
@@ -148,18 +147,18 @@
           />
         </el-form-item>
         <el-form-item
-          label="图片"
+          label="封面"
           :rules="[
             {
               required: true,
-              message: '请上传封面图片!'
+              message: '请上传封面 !'
             }
           ]"
           prop="categoryImage"
         >
-          <ImageUpload
-            @upload-success="getUrl"
-            :imageUrl="categoryForm.categoryImage"
+          <Upload
+            @uploadResponse="getUrl"
+            v-model:fileList="categoryImageList"
           />
         </el-form-item>
       </el-form>
@@ -181,7 +180,7 @@ import Delete from "@iconify-icons/ep/delete";
 import EditPen from "@iconify-icons/ep/edit-pen";
 import Warning from "@iconify-icons/ep/warning";
 import { useRenderIcon } from "@/components/ReIcon/src/hooks";
-import ImageUpload from "@/components/ReUpload/index.vue";
+import Upload from "@/components/ReUpload/index.vue";
 import { onMounted, ref, reactive, nextTick } from "vue";
 import type {
   CategoryInfo,
@@ -207,6 +206,10 @@ const queryParams = reactive<QueryParams>({
 });
 const queryFormRef = ref<FormInstance>();
 const dialogFormRef = ref<FormInstance>();
+interface UrlObject {
+  url: string;
+}
+const categoryImageList = ref<Array<UrlObject>>([]);
 const categoryForm = reactive<CategoryForm>({
   id: "",
   categoryName: "",
@@ -217,6 +220,7 @@ const loading = ref<boolean>(false);
 const dialogVisible = ref<boolean>(false);
 
 const categoryList = ref<CategoryInfo[]>();
+
 // 存储批量删除标签id
 const idList = ref<Array<number>>([]);
 onMounted(() => {
@@ -243,6 +247,7 @@ const cancel = () => {
   dialogVisible.value = false;
   dialogFormRef.value.resetFields();
   categoryForm.id = ""; // id不能重置
+  categoryImageList.value = [];
 };
 // 修改按钮回调
 const updateBtn = (row: CategoryInfo) => {
@@ -251,11 +256,14 @@ const updateBtn = (row: CategoryInfo) => {
   nextTick(() => {
     categoryForm.id = row.id;
     categoryForm.categoryName = row.categoryName;
+    categoryForm.categoryImage = row.categoryImage;
+    categoryImageList.value[0] = { url: row.categoryImage };
   });
 };
+
 // 上传图片成功，获取图片url
-const getUrl = imageUrl => {
-  categoryForm.categoryImage = imageUrl;
+const getUrl = imageData => {
+  categoryForm.categoryImage = imageData.url;
 };
 // dialog确定按钮回调
 const submit = (formEl: FormInstance | undefined) => {
@@ -266,27 +274,25 @@ const submit = (formEl: FormInstance | undefined) => {
         updateCategory(categoryForm).then(response => {
           if (response.code == 200) {
             message("修改成功", { type: "success" });
-            dialogVisible.value = false;
-            dialogFormRef.value.resetFields();
+
             getCategoryInfo();
           } else {
             message(response.message, { type: "error" });
           }
-          categoryForm.id = "";
         });
       } else {
         delete categoryForm.id;
         addCategory(categoryForm).then(response => {
           if (response.code == 200) {
             message("添加成功", { type: "success" });
-            dialogVisible.value = false;
-            dialogFormRef.value.resetFields();
+            cancel();
             getCategoryInfo();
           } else {
             message(response.message, { type: "error" });
           }
         });
       }
+      cancel();
     } else {
       return fields;
     }

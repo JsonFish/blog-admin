@@ -12,6 +12,7 @@ export interface CategoryData {
 export interface CategoryInfo {
   id: number;
   categoryName: string;
+  categoryImage: string;
   create_time: string;
   update_time: string;
 }

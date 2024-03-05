@@ -1,151 +1,183 @@
+<!--
+  不自动上传，确认按钮上传
+  限制上传为1的时候没加号
+  有预览和删除图标
+  avatar-uploader
+ -->
 <template>
-  <el-upload
-    class="avatar-uploader"
-    v-model:file-list="fileList"
-    :action="uploadImgUrl"
-    :headers="headers"
-    :show-file-list="false"
-    :on-success="handleUploadSuccess"
-    :on-error="handleUploadError"
-    :before-upload="beforeUpload"
-    :limit="limit"
-    :on-exceed="handleExceed"
-  >
-    <img v-if="imageUrl" :src="imageUrl" class="avatar" />
-    <el-icon v-else class="avatar-uploader-icon"><Plus /></el-icon>
-  </el-upload>
+  <div>
+    <el-upload
+      :class="[showUpload ? '' : 'hide-upload']"
+      ref="uploadRef"
+      v-model:file-list="uploadFileList"
+      list-type="picture-card"
+      :multiple="multiple"
+      :action="uploadImgUrl"
+      :headers="headers"
+      :before-upload="beforeUpload"
+      :on-success="handleUploadSuccess"
+      :on-preview="perview"
+      :on-remove="remove"
+      :limit="limit"
+      :auto-upload="true"
+      :on-change="change"
+      :on-exceed="handleExceed"
+    >
+      <el-icon class="avatar-uploader-icon"><Plus /></el-icon>
+    </el-upload>
+    <el-image-viewer
+      v-if="imageViewer"
+      :url-list="uploadFileList.map((item:any) => item.url)"
+      :initial-index="previewIndex"
+      :teleported="true"
+      :hide-on-click-modal="true"
+      @close="closeImgViewer"
+    />
+  </div>
 </template>
 
 <script lang="ts" setup>
-import { ref, reactive } from "vue";
+import { ref, watch } from "vue";
+import type { UploadInstance } from "element-plus";
+
 import { message } from "@/utils/message";
 import { Plus } from "@element-plus/icons-vue";
 import type { UploadProps } from "element-plus";
 import { getTokens, formatToken } from "@/utils/auth";
 
 const props = defineProps({
-  // imageUrl: {
-  //   type: String,
-  //   required: true
-  // },
   // 数量限制
   limit: {
     type: Number,
-    default: 2
+    default: 1
   },
   // 大小限制(MB)
   fileSize: {
     type: Number,
-    default: 2
+    default: 3
   },
-  // 上传图片url
+  // 上传图片请求路径
   uploadImgUrl: {
     type: String,
     // default: `${import.meta.env.VITE_APP_BASE_API}/file/upload`
     default: "/api/file/upload"
+  },
+  // 是否可以一次上传多个文件
+  multiple: {
+    type: Boolean,
+    default: false
+  },
+  // 默认上传图片数组 用于回显
+  fileList: {
+    type: Array<object>,
+    default: () => {}
   }
   // 文件类型, 例如'png', 'jpg', 'jpeg',字符串，英文逗号隔开
   // fileType: {
   //   type: String,
   //   default: ".png,.jpg,.jpeg"
-  // },
+  // }
   // 上传的请求头部
   // headers: {
   //   required: false,
   //   default: { Authorization: `Bearer ${getToken()}` }
   // },
   // 上传请求的url
-
-  // 是否显示提示
-  // isShowTip: {
-  //   type: Boolean,
-  //   default: true
-  // },
-  // 默认上传图片数组
-  // fileList: {
-  //   type: Array,
-  //   required: false
-  // },
-  // 照片墙盒子的宽度
-  // fileWidth: {
-  //   type: String,
-  //   default: "146px"
-  // },
-  // 照片墙盒子的高度
-  // fileHeight: {
-  //   type: String,
-  //   default: "146px"
-  // }
-  // disabled: {
-  //   type: Boolean,
-  //   default: false
-  // }
 });
-const fileList = reactive([]);
-const emit = defineEmits(["uploadSuccess"]);
+const emit = defineEmits(["uploadResponse"]);
+// 请求头
 const headers = {
   Authorization: formatToken(getTokens("accessToken"))
 };
-const imageUrl = ref<string>("");
+// 上传图片的列表
+const uploadFileList = ref([]);
+// 控制预览图片的显示隐藏
+const imageViewer = ref<boolean>(false);
+// 初始预览图像索引
+const previewIndex = ref(0);
+// 获取el-upload实例
+const uploadRef = ref<UploadInstance>();
+// 控制el-upload显示与隐藏
+const showUpload = ref<boolean>(true);
 
-// 上传错误回调函数
-const handleUploadError = error => {
-  message(error, { type: "error" });
+// 文件状态改变时的钩子
+const change = (uploadFile, uploadFiles) => {
+  if (uploadFiles.length >= props.limit) {
+    showUpload.value = false;
+  }
 };
-// 文件上传前回调函数
+
+// 文件上传前钩子
 const beforeUpload: UploadProps["beforeUpload"] = rawFile => {
   if (rawFile.type !== "image/jpeg" && rawFile.type !== "image/png") {
     message("图片必须是 JPG 或 PNG 格式 !", { type: "error" });
     return false;
   } else if (rawFile.size / 1024 / 1024 > props.fileSize) {
-    message(`图片大小不能 ${props.fileSize}MB!`, { type: "error" });
+    message(`图片大小不能超过 ${props.fileSize}!`, { type: "error" });
     return false;
   }
   return true;
 };
+
 // 文件上传超出限制回调函数
 const handleExceed = () => {
-  message(`上传文件数量不能超过 ${props.limit} 个!`, { type: "error" });
+  message(`最多上传 ${props.limit} 个文件!`, { type: "error" });
 };
+
 // 文件上传成功回调函数
 const handleUploadSuccess: UploadProps["onSuccess"] = response => {
   if (response.code == 200) {
-    imageUrl.value = response.data.path;
-    emit("uploadSuccess", response.data.path);
+    emit("uploadResponse", response.data);
     message("上传成功", { type: "success" });
   } else {
-    message("上传失败", { type: "error" });
+    message(response.message, { type: "error" });
   }
 };
+
+// 预览
+const perview = file => {
+  previewIndex.value = uploadFileList.value.findIndex(
+    (item: any) => item.uid == file.uid
+  );
+  imageViewer.value = true;
+};
+
+// 关闭预览
+const closeImgViewer = () => {
+  imageViewer.value = false;
+};
+
+// 移除
+const remove = (file, files) => {
+  if (files.length <= props.limit) {
+    showUpload.value = true;
+  }
+  console.log(file.url);
+};
+
+// 监听 便于隐藏el-upload
+watch(
+  () => props.fileList,
+  newVal => {
+    uploadFileList.value = newVal;
+    if (newVal.length >= props.limit) {
+      showUpload.value = false;
+    }
+    if (!newVal.length) {
+      showUpload.value = true;
+    }
+  },
+  {
+    immediate: true,
+    deep: true
+  }
+);
 </script>
 
 <style scoped>
-.avatar-uploader .avatar {
-  width: 178px;
-  height: 178px;
-  display: block;
-}
-</style>
-
-<style>
-.avatar-uploader .el-upload {
-  border: 1px dashed var(--el-border-color);
-  border-radius: 6px;
-  cursor: pointer;
-  position: relative;
-  overflow: hidden;
-  transition: var(--el-transition-duration-fast);
-}
-
-.avatar-uploader .el-upload:hover {
-  border-color: var(--el-color-primary);
-}
-
-.el-icon.avatar-uploader-icon {
-  font-size: 28px;
-  color: #8c939d;
-  width: 150px;
-  height: 150px;
-  text-align: center;
+.hide-upload {
+  :deep(.el-upload--picture-card) {
+    display: none;
+  }
 }
 </style>
