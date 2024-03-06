@@ -6,7 +6,7 @@
       </template>
       <el-row>
         <el-form :model="queryParams" :inline="true" ref="queryFormRef">
-          <el-form-item label="分类名称">
+          <el-form-item label="搜索分类">
             <el-input
               v-model="queryParams.categoryName"
               placeholder="请输入分类名称"
@@ -49,7 +49,7 @@
         <el-table-column
           prop="categoryName"
           align="center"
-          label="分类名称"
+          label="分类"
           width="200"
         />
         <el-table-column
@@ -129,7 +129,7 @@
     >
       <el-form :model="categoryForm" ref="dialogFormRef" label-width="100px">
         <el-form-item
-          label="分类名称"
+          label="分类"
           prop="categoryName"
           :rules="[
             {
@@ -159,7 +159,7 @@
           <Upload
             @uploadResponse="getUrl"
             v-model:fileList="categoryImageList"
-            :fileSize="4"
+            :fileSize="5"
           />
         </el-form-item>
       </el-form>

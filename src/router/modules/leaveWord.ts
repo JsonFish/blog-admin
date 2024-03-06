@@ -5,11 +5,11 @@ export default {
   meta: {
     title: "留言管理",
     icon: LeaveWord,
-    rank: 5
+    rank: 3
   },
   children: [
     {
-      path: "/manage/leaveWord",
+      path: "/leaveWord",
       name: "leaveWord",
       component: () => import("@/views/leaveWord/index.vue"),
       meta: {

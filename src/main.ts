@@ -21,8 +21,6 @@ import "element-plus/dist/index.css";
 // 导入字体图标
 import "./assets/iconfont/iconfont.js";
 import "./assets/iconfont/iconfont.css";
-// 引入bytemd markdown编辑器样式
-import "bytemd/dist/index.css";
 const app = createApp(App);
 
 // 自定义指令

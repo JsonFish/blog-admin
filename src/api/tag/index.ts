@@ -1,7 +1,7 @@
 import { http } from "@/utils/http";
 import type { TagData, QueryParams, TagForm } from "./type";
 /** 获取标签列表 */
-export const getTagList = (params: QueryParams) => {
+export const getTagList = (params?: QueryParams) => {
   return http.request<BaseResponse<TagData>>("get", "/tag", { params });
 };
 /** 新增标签 */

@@ -5,11 +5,11 @@ export default {
   meta: {
     title: "用户管理",
     icon: User,
-    rank: 3
+    rank: 5
   },
   children: [
     {
-      path: "/users/manage",
+      path: "/users",
       name: "Users",
       component: () => import("@/views/users/index.vue"),
       meta: {

@@ -26,8 +26,7 @@ const defaultConfig: AxiosRequestConfig = {
   timeout: 5000,
   // 请求头
   headers: {
-    Accept: "application/json, text/plain, */*",
-    "Content-Type": "application/json",
+    Accept: "application/json, text/plain, multipart/form-data, */*",
     "X-Requested-With": "XMLHttpRequest"
   },
   baseURL: "/api", // 向 /api 路径发请求(会被vite拦截跨域)

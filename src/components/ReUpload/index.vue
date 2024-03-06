@@ -1,9 +1,3 @@
-<!--
-  不自动上传，确认按钮上传
-  限制上传为1的时候没加号
-  有预览和删除图标
-  avatar-uploader
- -->
 <template>
   <div>
     <el-upload
@@ -12,16 +6,15 @@
       v-model:file-list="uploadFileList"
       list-type="picture-card"
       :multiple="multiple"
-      :action="uploadImgUrl"
-      :headers="headers"
+      action="#"
       :before-upload="beforeUpload"
-      :on-success="handleUploadSuccess"
       :on-preview="perview"
       :on-remove="remove"
       :limit="limit"
-      :auto-upload="true"
+      :auto-upload="autoUpload"
       :on-change="change"
       :on-exceed="handleExceed"
+      :http-request="handleFileUpload"
     >
       <el-icon class="avatar-uploader-icon"><Plus /></el-icon>
     </el-upload>
@@ -39,11 +32,10 @@
 <script lang="ts" setup>
 import { ref, watch } from "vue";
 import type { UploadInstance } from "element-plus";
-
+import { uploadFile } from "@/api/file";
 import { message } from "@/utils/message";
 import { Plus } from "@element-plus/icons-vue";
 import type { UploadProps } from "element-plus";
-import { getTokens, formatToken } from "@/utils/auth";
 
 const props = defineProps({
   // 数量限制
@@ -54,13 +46,7 @@ const props = defineProps({
   // 大小限制(MB)
   fileSize: {
     type: Number,
-    default: 3
-  },
-  // 上传图片请求路径
-  uploadImgUrl: {
-    type: String,
-    // default: `${import.meta.env.VITE_APP_BASE_API}/file/upload`
-    default: "/api/file/upload"
+    default: 2
   },
   // 是否可以一次上传多个文件
   multiple: {
@@ -71,24 +57,19 @@ const props = defineProps({
   fileList: {
     type: Array<object>,
     default: () => {}
+  },
+  // 是否自动上传
+  autoUpload: {
+    type: Boolean,
+    default: true
   }
   // 文件类型, 例如'png', 'jpg', 'jpeg',字符串，英文逗号隔开
   // fileType: {
   //   type: String,
   //   default: ".png,.jpg,.jpeg"
   // }
-  // 上传的请求头部
-  // headers: {
-  //   required: false,
-  //   default: { Authorization: `Bearer ${getToken()}` }
-  // },
-  // 上传请求的url
 });
 const emit = defineEmits(["uploadResponse"]);
-// 请求头
-const headers = {
-  Authorization: formatToken(getTokens("accessToken"))
-};
 // 上传图片的列表
 const uploadFileList = ref([]);
 // 控制预览图片的显示隐藏
@@ -113,7 +94,7 @@ const beforeUpload: UploadProps["beforeUpload"] = rawFile => {
     message("图片必须是 JPG 或 PNG 格式 !", { type: "error" });
     return false;
   } else if (rawFile.size / 1024 / 1024 > props.fileSize) {
-    message(`图片大小不能超过 ${props.fileSize}!`, { type: "error" });
+    message(`图片大小不能超过 ${props.fileSize}MB!`, { type: "error" });
     return false;
   }
   return true;
@@ -124,15 +105,18 @@ const handleExceed = () => {
   message(`最多上传 ${props.limit} 个文件!`, { type: "error" });
 };
 
-// 文件上传成功回调函数
-const handleUploadSuccess: UploadProps["onSuccess"] = response => {
-  if (response.code == 200) {
-    emit("uploadResponse", response.data);
-    message("上传成功", { type: "success" });
-  } else {
-    message(response.message, { type: "error" });
-  }
+// 手动上传
+const handUploadFile = () => {
+  uploadRef.value.submit();
 };
+
+// 自定义上传函数 参数为上传的文件
+const handleFileUpload = async file => {
+  const response = await uploadFile(file);
+  emit("uploadResponse", response.data);
+};
+
+defineExpose({ handUploadFile });
 
 // 预览
 const perview = file => {
@@ -152,10 +136,9 @@ const remove = (file, files) => {
   if (files.length <= props.limit) {
     showUpload.value = true;
   }
-  console.log(file.url);
 };
 
-// 监听 便于隐藏el-upload
+// 监听props.fileList 便于隐藏el-upload
 watch(
   () => props.fileList,
   newVal => {

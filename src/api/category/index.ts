@@ -6,7 +6,7 @@ import type {
   OtherCategoryResponse
 } from "./type";
 /** 获取专栏 */
-export const getCategoryList = (params: QueryParams) => {
+export const getCategoryList = (params?: QueryParams) => {
   return http.request<GetCategoryResponse>("get", "/category", { params });
 };
 /** 添加专栏 */

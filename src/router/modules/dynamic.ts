@@ -5,7 +5,7 @@ export default {
   meta: {
     title: "动态管理",
     icon: friendlink,
-    rank: 6
+    rank: 2
   },
   children: [
     {
