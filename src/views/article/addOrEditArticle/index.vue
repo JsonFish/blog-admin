@@ -24,7 +24,7 @@
     </template>
     <MdEditor
       style="height: 70vh"
-      v-model="articleForm.content"
+      v-model="articleForm.articleContent"
       @onUploadImg="onUploadImg"
     />
     <el-drawer v-model="drawerVisible" @close="closeDrawer" :show-close="false">
@@ -49,20 +49,41 @@
         </div>
       </template>
       <el-form ref="articleFormRef" :model="articleForm" label-width="80px">
-        <el-form-item label="文章标题" prop="title">
-          <el-input placeholder="请输入文章标题" v-model="articleForm.title" />
+        <el-form-item label="文章标题" prop="articleTitle">
+          <el-input
+            placeholder="请输入文章标题"
+            v-model="articleForm.articleTitle"
+          />
         </el-form-item>
-        <el-form-item label="摘要" prop="abstract">
+        <el-form-item
+          label="摘要"
+          prop="articleSummary"
+          :rules="[
+            {
+              required: true,
+              message: '摘要不能为空 !'
+            }
+          ]"
+        >
           <el-input
             type="textarea"
             placeholder="请输入文章摘要"
-            v-model="articleForm.abstract"
-            :autosize="{ minRows: 4, maxRows: 6 }"
+            v-model="articleForm.articleSummary"
+            :autosize="{ minRows: 2, maxRows: 4 }"
           />
         </el-form-item>
-        <el-form-item label="分类" prop="category">
+        <el-form-item
+          label="分类"
+          prop="categoryId"
+          :rules="[
+            {
+              required: true,
+              message: '分类不能为空 !'
+            }
+          ]"
+        >
           <el-select
-            v-model="articleForm.category"
+            v-model="articleForm.categoryId"
             placeholder="请选择文章分类"
             clearable
           >
@@ -74,10 +95,19 @@
             />
           </el-select>
         </el-form-item>
-        <el-form-item label="标签" prop="tagList">
+        <el-form-item
+          label="标签"
+          prop="tagIds"
+          :rules="[
+            {
+              required: true,
+              message: '标签不能为空 !'
+            }
+          ]"
+        >
           <el-select
             multiple
-            v-model="articleForm.tagList"
+            v-model="articleForm.tagIds"
             clearable
             placeholder="请选择标签"
           >
@@ -91,7 +121,7 @@
         </el-form-item>
         <el-form-item
           label="封面"
-          prop="cover"
+          prop="articleCover"
           :rules="[
             {
               required: true,
@@ -106,9 +136,9 @@
             v-model:fileList="imageList"
           />
         </el-form-item>
-        <el-form-item label="置顶" prop="top">
+        <el-form-item label="置顶" prop="isTop">
           <el-switch
-            v-model="articleForm.top"
+            v-model="articleForm.isTop"
             inline-prompt
             :active-value="1"
             :inactive-value="0"
@@ -116,7 +146,7 @@
             :inactive-icon="Close"
           />
         </el-form-item>
-        <el-form-item label="排序" prop="order" v-show="articleForm.top">
+        <el-form-item label="排序" prop="order" v-show="articleForm.isTop">
           <el-input-number :min="1" v-model="articleForm.order" />
         </el-form-item>
         <el-form-item label="类型" prop="type">
@@ -126,21 +156,45 @@
             <el-radio :label="2">翻译</el-radio>
           </el-radio-group>
         </el-form-item>
-
-        <el-form-item label="作者" prop="author" v-show="articleForm.type == 1">
+        <el-form-item
+          label="作者"
+          prop="author"
+          :rules="[
+            {
+              required: true,
+              message: '作者不能为空 !'
+            }
+          ]"
+          v-if="articleForm.type == 1"
+        >
           <el-input
             v-model="articleForm.author"
             placeholder="请输入原文章作者"
           />
         </el-form-item>
-        <el-form-item label="链接" prop="link" v-show="articleForm.type != 0">
-          <el-input v-model="articleForm.link" placeholder="请输入原文链接" />
+        <el-form-item
+          label="链接"
+          prop="originUrl"
+          v-if="articleForm.type != 0"
+          :rules="[
+            {
+              required: true,
+              message: '链接不能为空 !'
+            }
+          ]"
+        >
+          <el-input
+            v-model="articleForm.originUrl"
+            placeholder="请输入原文链接"
+          />
         </el-form-item>
       </el-form>
       <template #footer>
         <div style="border-top: 1px solid gray; padding-top: 10px">
           <el-button @click="closeDrawer">取消</el-button>
-          <el-button type="primary">发布</el-button>
+          <el-button type="primary" @click="publishArticle(articleFormRef)"
+            >发布</el-button
+          >
         </div>
       </template>
     </el-drawer>
@@ -155,32 +209,36 @@ import Close from "@/assets/svg/close.svg?component";
 import { useRenderIcon } from "@/components/ReIcon/src/hooks";
 import Upload from "@/components/ReUpload/index.vue";
 import { reactive, ref } from "vue";
-import type { UploadUserFile } from "element-plus";
+import type { UploadUserFile, FormInstance } from "element-plus";
 import { MdEditor } from "md-editor-v3";
 import "md-editor-v3/lib/style.css";
+import { addOrUpdateArticle } from "@/api/article";
 import { getCategoryList } from "@/api/category";
 import { getTagList } from "@/api/tag";
 import { uploadFile } from "@/api/file";
-const articleFormRef = ref();
+import { message } from "@/utils/message";
+
+const articleFormRef = ref<FormInstance>();
 const drawerVisible = ref<boolean>(false);
 const articleForm = reactive({
   id: "",
-  title: "",
-  abstract: "",
-  content: "", // 文章内容
-  cover: "", // 封面url
-  category: null, // 分类
-  tagList: [], // 标签
-  top: 0, // 0 不置顶 1 置顶
+  articleTitle: "", // 标题
+  articleSummary: "", // 摘要
+  articleContent: "", // 文章内容
+  articleCover: "", // 封面url
+  categoryId: null, // 分类
+  tagIds: [], // 标签
+  isTop: 0, // 0 不置顶 1 置顶
   order: 1, // 置顶文章的排序
-  status: 0, // 状态 1 公开 2 私密 3 回收站（相当于草稿）
+  status: 0, // 状态 0 私密 1 公开
   type: 0, // 类型 0 原创 1 转载 2 翻译
   author: "", // 作者
-  link: "" // 原文链接 翻译或转载才需要填
+  originUrl: "" // 原文链接
 });
 const categoryList = ref<any>();
 const tagList = ref<any>();
 const imageList = ref<UploadUserFile[]>([]);
+
 // 打开Drawer回调函数
 const openDrawer = async () => {
   drawerVisible.value = true;
@@ -191,15 +249,19 @@ const openDrawer = async () => {
     tagList.value = response.data.tagList;
   });
 };
+
 // 关闭Drawer
 const closeDrawer = () => {
   drawerVisible.value = false;
   articleFormRef.value.resetFields();
+  imageList.value = [];
 };
+
 // Upload组件 上传成功回调
 const getUrl = imageurl => {
-  console.log(imageurl);
+  articleForm.articleCover = imageurl.url;
 };
+
 // 上传图片
 const onUploadImg = async (files, callback) => {
   // files 上传文件数组
@@ -215,5 +277,30 @@ const onUploadImg = async (files, callback) => {
     })
   );
   callback(res.map(item => item.data.url));
+};
+
+// 发布文章
+const publishArticle = async (formEl: FormInstance | undefined) => {
+  if (!formEl) return;
+  await formEl.validate((valid, fields) => {
+    if (valid) {
+      if (!articleForm.articleContent) {
+        message("文章内容不能为空 !", { type: "warning" });
+        return;
+      }
+      // 上传
+      addOrUpdateArticle(articleForm).then(response => {
+        if (response.code == 200) {
+          message("发布成功", { type: "success" });
+          closeDrawer();
+          articleForm.articleContent = "";
+        } else {
+          message("发布失败", { type: "error" });
+        }
+      });
+    } else {
+      return fields;
+    }
+  });
 };
 </script>

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from "vue";
-import Upload from "@/views/fighting/effort.vue";
+import Upload from "@/components/ReUpload/test.vue";
 defineOptions({
   name: "Home"
 });
