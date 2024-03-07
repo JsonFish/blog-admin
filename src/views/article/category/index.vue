@@ -195,7 +195,7 @@ import {
   deleteCategory
 } from "@/api/category";
 import { message } from "@/utils/message";
-import { type FormInstance } from "element-plus";
+import type { FormInstance, UploadUserFile } from "element-plus";
 defineOptions({
   name: "Category"
 });
@@ -207,10 +207,8 @@ const queryParams = reactive<QueryParams>({
 });
 const queryFormRef = ref<FormInstance>();
 const dialogFormRef = ref<FormInstance>();
-interface UrlObject {
-  url: string;
-}
-const categoryImageList = ref<Array<UrlObject>>([]);
+
+const categoryImageList = ref<UploadUserFile[]>([]);
 const categoryForm = reactive<CategoryForm>({
   id: "",
   categoryName: "",
@@ -258,7 +256,10 @@ const updateBtn = (row: CategoryInfo) => {
     categoryForm.id = row.id;
     categoryForm.categoryName = row.categoryName;
     categoryForm.categoryImage = row.categoryImage;
-    categoryImageList.value[0] = { url: row.categoryImage };
+    categoryImageList.value[0] = {
+      url: row.categoryImage,
+      name: row.categoryName
+    };
   });
 };
 
