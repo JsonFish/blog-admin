@@ -136,7 +136,8 @@
               required: true,
               min: 2,
               max: 10,
-              message: '分类名长度2-10位 !'
+              message: '分类名长度2-10位 !',
+              trigger: 'blur'
             }
           ]"
         >
@@ -151,13 +152,14 @@
           :rules="[
             {
               required: true,
-              message: '请上传封面 !'
+              message: '请上传封面 !',
+              trigger: 'blur'
             }
           ]"
           prop="categoryImage"
         >
           <Upload
-            @uploadResponse="getUrl"
+            @getFileList="getFileList"
             v-model:fileList="categoryImageList"
             :fileSize="5"
           />
@@ -194,6 +196,7 @@ import {
   updateCategory,
   deleteCategory
 } from "@/api/category";
+import { uploadFileList } from "@/components/ReUpload/upload";
 import { message } from "@/utils/message";
 import type { FormInstance, UploadUserFile } from "element-plus";
 defineOptions({
@@ -220,8 +223,9 @@ const dialogVisible = ref<boolean>(false);
 
 const categoryList = ref<CategoryInfo[]>();
 
-// 存储批量删除标签id
+// 存储批量删除分类id
 const idList = ref<Array<number>>([]);
+
 onMounted(() => {
   getCategoryInfo();
 });
@@ -263,26 +267,56 @@ const updateBtn = (row: CategoryInfo) => {
   });
 };
 
-// 上传图片成功，获取图片url
-const getUrl = imageData => {
-  categoryForm.categoryImage = imageData.url;
+// 获取要上传的文件
+const getFileList = fileList => {
+  console.log(fileList);
+  categoryImageList.value = fileList;
 };
+
 // dialog确定按钮回调
-const submit = (formEl: FormInstance | undefined) => {
+const submit = async (formEl: FormInstance | undefined) => {
   if (!formEl) return;
-  formEl.validate((valid, fields) => {
-    if (valid) {
-      if (categoryForm.id) {
+  if (categoryForm.id) {
+    // 修改
+    // 先判断是否更换封面
+    if (categoryImageList.value.length == 0) {
+      categoryForm.categoryImage = "";
+    }
+    if (
+      categoryImageList.value.length != 0 &&
+      categoryImageList.value[0].url != categoryForm.categoryImage
+    ) {
+      await uploadFileList(categoryImageList.value).then(response => {
+        categoryForm.categoryImage = response[0].url;
+      });
+    }
+    // 再校验
+    formEl.validate(async (valid, fields) => {
+      if (valid) {
         updateCategory(categoryForm).then(response => {
           if (response.code == 200) {
             message("修改成功", { type: "success" });
-
             getCategoryInfo();
+            cancel();
           } else {
             message(response.message, { type: "error" });
           }
         });
       } else {
+        return fields;
+      }
+    });
+  } else {
+    // 添加
+    // 先上传封面
+    if (categoryImageList.value.length != 0) {
+      await uploadFileList(categoryImageList.value).then(response => {
+        categoryForm.categoryImage = response[0].url;
+      });
+    }
+    // 再校验
+    formEl.validate((valid, fields) => {
+      if (valid) {
         delete categoryForm.id;
         addCategory(categoryForm).then(response => {
           if (response.code == 200) {
@@ -293,12 +327,11 @@ const submit = (formEl: FormInstance | undefined) => {
             message(response.message, { type: "error" });
           }
         });
+      } else {
+        return fields;
       }
-      cancel();
-    } else {
-      return fields;
-    }
-  });
+    });
+  }
 };
 // checkBox处理
 const handleSelectionChange = (categoryList: CategoryInfo[]) => {
@@ -319,7 +352,7 @@ const deleteBtn = (row: CategoryInfo | any) => {
       message("删除成功", { type: "success" });
       getCategoryInfo();
     } else {
-      message("删除失败", { type: "error" });
+      message(response.message, { type: "error" });
     }
   });
   categoryForm.id = ""; // 重置id

@@ -1,7 +1,7 @@
 import { http } from "@/utils/http";
 
 export const uploadFile = (data: any) => {
-  return http.request<BaseResponse>(
+  return http.request<BaseResponse<any>>(
     "post",
     "/file/upload",
     { data },

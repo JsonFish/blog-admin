@@ -1,8 +1,10 @@
 import { http } from "@/utils/http";
-import type { GetCategoryResponse, QueryParams, CategoryForm } from "./type";
+import type { QueryParams, CategoryForm, CategoryData } from "./type";
 /** 获取分类 */
 export const getCategoryList = (params?: QueryParams) => {
-  return http.request<GetCategoryResponse>("get", "/category", { params });
+  return http.request<BaseResponse<CategoryData>>("get", "/category", {
+    params
+  });
 };
 /** 添加分类 */
 export const addCategory = (data: CategoryForm) => {

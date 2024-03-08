@@ -2,7 +2,6 @@ import { storeToRefs } from "pinia";
 import { getConfig } from "@/config";
 import { emitter } from "@/utils/mitt";
 import { routeMetaType } from "../types";
-import userAvatar from "@/assets/user.jpg";
 import { getTopMenu } from "@/router/utils";
 import { useGlobal } from "@pureadmin/utils";
 import { useRouter, useRoute } from "vue-router";
@@ -33,12 +32,14 @@ export function useNav() {
   });
 
   /** 用户名 */
-  const email = computed(() => {
-    return useUserStoreHook()?.email;
+  const username = computed(() => {
+    return useUserStoreHook().username;
   });
-
+  const userAvatar = computed(() => {
+    return useUserStoreHook().avatar;
+  });
   const avatarsStyle = computed(() => {
-    return email.value ? { marginRight: "10px" } : "";
+    return username.value ? { marginRight: "10px" } : "";
   });
 
   const isCollapse = computed(() => {
@@ -125,7 +126,7 @@ export function useNav() {
     resolvePath,
     isCollapse,
     pureApp,
-    email,
+    username,
     userAvatar,
     avatarsStyle,
     tooltipEffect

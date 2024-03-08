@@ -1,4 +1,4 @@
-import Article from "@iconify-icons/ri/article-fill";
+import Article from "@/assets/svg/article.svg?component";
 import Document from "@iconify-icons/ep/document";
 import specialColumn from "@iconify-icons/ri/layout-2-line";
 import Tag from "@iconify-icons/ri/bookmark-3-line";

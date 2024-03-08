@@ -1,16 +1,30 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import Upload from "@/components/ReUpload/test.vue";
+import { uploadFile } from "@/api/file";
 defineOptions({
   name: "Home"
 });
 const fileList = ref([]);
 const uploadRef = ref();
-const upload = () => {
-  uploadRef.value.handUploadFile();
+const files = ref([]);
+const getFileList = async fileList => {
+  files.value = fileList;
 };
-const getUrl = fileUrl => {
-  console.log(fileUrl);
+
+const uploadFun = async () => {
+  const res = await Promise.all(
+    files.value.map(file => {
+      const form = new FormData();
+      form.append("file", file.raw);
+      return new Promise((rev, rej) => {
+        uploadFile(form)
+          .then(res => rev(res.data))
+          .catch(error => rej(error));
+      });
+    })
+  );
+  console.log(res);
 };
 </script>
 
@@ -22,13 +36,11 @@ const getUrl = fileUrl => {
     <Upload
       ref="uploadRef"
       v-model:fileList="fileList"
-      :limit="2"
+      :limit="5"
       multiple
       :autoUpload="true"
-      @uploadResponse="getUrl"
+      @getFileList="getFileList"
     />
-    <template #footer>
-      <el-button @click="upload">上传</el-button>
-    </template>
+    <el-button @click="uploadFun" />
   </el-card>
 </template>

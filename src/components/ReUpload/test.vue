@@ -17,7 +17,26 @@
       :http-request="handleFileUpload"
     >
       <el-icon class="avatar-uploader-icon"><Plus /></el-icon>
+      <template #file="{ file }">
+        <div>
+          <el-image
+            :style="{ width: width + 'px', height: height + 'px' }"
+            fit="cover"
+            :src="file.url"
+            lazy
+          />
+          <span class="el-upload-list__item-actions">
+            <span class="el-upload-list__item-preview" @click="perview(file)">
+              <el-icon><zoom-in /></el-icon>
+            </span>
+            <span class="el-upload-list__item-delete" @click="remove(file)">
+              <el-icon><Delete /></el-icon>
+            </span>
+          </span>
+        </div>
+      </template>
     </el-upload>
+
     <el-image-viewer
       v-if="imageViewer"
       :url-list="uploadFileList.map((item:any) => item.url)"
@@ -32,9 +51,8 @@
 <script lang="ts" setup>
 import { ref, watch } from "vue";
 import type { UploadInstance } from "element-plus";
-import { uploadFile } from "@/api/file";
 import { message } from "@/utils/message";
-import { Plus } from "@element-plus/icons-vue";
+import { Plus, Delete, ZoomIn } from "@element-plus/icons-vue";
 import type { UploadProps } from "element-plus";
 
 const props = defineProps({
@@ -61,7 +79,17 @@ const props = defineProps({
   // 是否自动上传
   autoUpload: {
     type: Boolean,
-    default: false
+    default: true
+  },
+  // 宽
+  width: {
+    type: Number,
+    default: 200
+  },
+  // 高
+  height: {
+    type: Number,
+    default: 200
   }
   // 文件类型, 例如'png', 'jpg', 'jpeg',字符串，英文逗号隔开
   // fileType: {
@@ -69,7 +97,7 @@ const props = defineProps({
   //   default: ".png,.jpg,.jpeg"
   // }
 });
-const emit = defineEmits(["uploadResponse"]);
+const emit = defineEmits(["getFileList"]);
 // 上传图片的列表
 const uploadFileList = ref([]);
 // 控制预览图片的显示隐藏
@@ -105,18 +133,16 @@ const handleExceed = () => {
   message(`最多上传 ${props.limit} 个文件!`, { type: "error" });
 };
 
-// 手动上传
-const handUploadFile = () => {
-  uploadRef.value.submit();
-};
-
 // 自定义上传函数 参数为上传的文件
-const handleFileUpload = async file => {
-  const response = await uploadFile(file);
-  emit("uploadResponse", response.data);
-};
+const handleFileUpload = () => {};
 
-defineExpose({ handUploadFile });
+// 监听 uploadFileList.value
+watch(
+  () => uploadFileList.value,
+  newVal => {
+    emit("getFileList", newVal);
+  }
+);
 
 // 预览
 const perview = file => {
@@ -132,10 +158,18 @@ const closeImgViewer = () => {
 };
 
 // 移除
-const remove = (file, files) => {
-  if (files.length <= props.limit) {
+const remove = file => {
+  const { url } = file;
+  const index = uploadFileList.value.findIndex(file => file.url == url);
+
+  if (index != -1) {
+    uploadFileList.value.splice(index, 1);
+  }
+  if (uploadFileList.value.length <= props.limit) {
     showUpload.value = true;
   }
+  // 移除uploadFileList.value 无变化 无法监听
+  emit("getFileList", uploadFileList.value);
 };
 
 // 监听props.fileList 便于隐藏el-upload

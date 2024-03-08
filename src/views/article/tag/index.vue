@@ -226,10 +226,10 @@ const submit = (formEl: FormInstance | undefined) => {
             dialogVisible.value = false;
             dialogFormRef.value.resetFields();
             getTagInfo();
+            tagForm.id = "";
           } else {
             message(response.message, { type: "error" });
           }
-          tagForm.id = "";
         });
       } else {
         delete tagForm.id;

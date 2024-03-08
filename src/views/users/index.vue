@@ -88,7 +88,7 @@
               >
               <el-popconfirm
                 width="220"
-                :title="`是否删除用户: ${scope.row.username} ?`"
+                :title="`是否删除用户 ${scope.row.username} ?`"
                 :icon="useRenderIcon(Warning)"
                 icon-color="#f56c6c"
                 @confirm="deleteUserBtn(scope.row)"

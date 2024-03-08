@@ -11,15 +11,17 @@ import { type DataInfo, setToken, removeToken, sessionKey } from "@/utils/auth";
 import { message } from "@/utils/message";
 export const useUserStore = defineStore("user", {
   state: (): userType => ({
+    avatar: "",
     // 用户名
-    email: storageSession().getItem<DataInfo<number>>(sessionKey)?.email ?? "",
+    username: "",
+    // storageSession().getItem<DataInfo<number>>(sessionKey)?.username ?? "",
     // 页面级别权限
     role: storageSession().getItem<DataInfo<number>>(sessionKey)?.role ?? 0
   }),
   actions: {
     /** 存储用户名 */
-    SET_USERNAME(email: string) {
-      this.email = email;
+    SET_USERNAME(username: string) {
+      this.username = username;
     },
     /** 存储角色 */
     SET_ROLES(role: number) {
@@ -31,6 +33,9 @@ export const useUserStore = defineStore("user", {
         getLogin(data)
           .then(response => {
             if (response.code == 200) {
+              // this.SET_USERNAME(response.data.username);
+              this.username = response.data.username;
+              this.avatar = response.data.avatar;
               // setToken(response.data);
               resolve(response);
             } else {
@@ -61,7 +66,7 @@ export const useUserStore = defineStore("user", {
           this.logOut();
           return;
         }
-        refreshTokenApi({ refreshToken })
+        refreshTokenApi()
           .then(response => {
             // 刷新成功
             if (response.code == 200) {

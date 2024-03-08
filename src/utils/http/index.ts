@@ -68,7 +68,17 @@ class PureHttp {
         //   console.log("accessToken", getTokens("accessToken"));
         //   return config;
         // }
-        config.headers["Authorization"] = formatToken(getTokens("accessToken"));
+        // 如果是刷新token接口 将refreshToken放到Authorization字段中
+        if (config.url == "/refreshToken") {
+          config.headers["Authorization"] = formatToken(
+            getTokens("refreshToken")
+          );
+        } else {
+          config.headers["Authorization"] = formatToken(
+            getTokens("accessToken")
+          );
+        }
+
         // 开启进度条动画
         NProgress.start();
         // 优先判断post/get等方法是否传入回调，否则执行初始化设置等回调
@@ -130,6 +140,7 @@ class PureHttp {
   private httpInterceptorsResponse(): void {
     const instance = PureHttp.axiosInstance;
     instance.interceptors.response.use(
+      // 成功响应拦截
       (response: PureHttpResponse) => {
         const $config = response.config;
         // 关闭进度条动画
@@ -143,29 +154,23 @@ class PureHttp {
           PureHttp.initConfig.beforeResponseCallback(response);
           return response.data;
         }
-        // refershToken 过期
-        if (response.data.code == 401) {
-          message(response.data.message, { type: "error" });
-          useUserStore().logOut();
-        }
         // 无权限操作数据
-        if (response.data.code == 403) {
-          message(response.data.message, { type: "error" });
-          return;
-        }
+        // if (response.data.code == 403) {
+        //   message(response.data.message, { type: "error" });
+        //   return;
+        // }
 
         return response.data;
       },
-      // 错误响应拦截
+      // 失败响应拦截
       async (error: PureHttpError) => {
-        // accessToken过期 不是刷新refreshToken过期
+        // accessToken过期 不是refreshToken过期
         if (
           error.response.status === 401 &&
-          error.config.url != "/refershToken"
+          error.config.url != "/refreshToken"
         ) {
-          // 判断是否正在刷新token
           const config = error.config;
-
+          // 判断是否正在刷新token
           if (!PureHttp.isRefreshing) {
             PureHttp.isRefreshing = true;
             return useUserStore()
@@ -173,7 +178,6 @@ class PureHttp {
               .then(
                 // token刷新成功
                 response => {
-                  console.log("token 刷新成功");
                   const token = response.data.accessToken;
                   // 设置 Authorization 字段
                   PureHttp.axiosInstance.defaults.headers.common.Authorization =
@@ -220,7 +224,16 @@ class PureHttp {
               // });
             });
           }
+        } // refreshToken 过期
+        else if (
+          error.response.status === 401 &&
+          error.config.url == "/refreshToken"
+        ) {
+          PureHttp.isRefreshing = false;
+          message("refreshToken失效 , 请重新登录", { type: "error" });
+          useUserStore().logOut();
         } else {
+          PureHttp.isRefreshing = false;
           const $error = error;
           let msg: string;
           if ($error.response.status) {
