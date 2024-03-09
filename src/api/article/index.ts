@@ -1,6 +1,6 @@
 import { http } from "@/utils/http";
 // 获取文章列表
-export const getArticleList = (params?: object) => {
+export const getArticle = (params: object) => {
   return http.request("get", "/article", { params });
 };
 // 新增或者修改文章

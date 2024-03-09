@@ -248,7 +248,7 @@ const articleForm = reactive({
   tagIds: [], // 标签
   isTop: 0, // 0 不置顶 1 置顶
   order: 1, // 置顶文章的排序
-  status: 0, // 状态 0 私密 1 公开
+  status: 0, // 状态 0 公开 1 草稿
   type: 0, // 类型 0 原创 1 转载 2 翻译
   author: "", // 作者
   originUrl: "" // 原文链接
