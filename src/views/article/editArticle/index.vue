@@ -33,7 +33,12 @@
       v-model="articleForm.articleContent"
       @onUploadImg="onUploadImg"
     />
-    <el-drawer v-model="drawerVisible" @close="closeDrawer" :show-close="false">
+    <el-drawer
+      :close-on-click-modal="false"
+      v-model="drawerVisible"
+      @close="closeDrawer"
+      :show-close="false"
+    >
       <template #header="{ close, titleId, titleClass }">
         <div
           style="
@@ -328,4 +333,3 @@ const publishArticle = async (formEl: FormInstance | undefined) => {
   });
 };
 </script>
-@/utils/upload

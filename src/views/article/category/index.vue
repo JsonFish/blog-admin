@@ -359,4 +359,3 @@ const deleteBtn = (row: CategoryInfo | any) => {
 </script>
 
 <style lang="scss" scoped></style>
-@/utils/upload
