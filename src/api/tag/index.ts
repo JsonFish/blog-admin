@@ -6,13 +6,13 @@ export const getTagList = (params?: QueryParams) => {
 };
 /** 新增标签 */
 export const addTag = (data: TagForm) => {
-  return http.request<BaseResponse>("post", "/tag", { data });
+  return http.request<BaseResponse<any>>("post", "/tag", { data });
 };
 /** 修改标签 */
 export const updateTag = (data: TagForm) => {
-  return http.request<BaseResponse>("put", "/tag", { data });
+  return http.request<BaseResponse<any>>("put", "/tag", { data });
 };
 /** 删除标签 */
 export const deleteTag = (data: TagForm) => {
-  return http.request<BaseResponse>("delete", `/tag`, { data });
+  return http.request<BaseResponse<any>>("delete", `/tag`, { data });
 };

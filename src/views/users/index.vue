@@ -24,33 +24,14 @@
         <el-button type="info" :icon="useRenderIcon(Refresh)" @click="reset"
           >重置</el-button
         >
-        <!-- <el-button
-          type="primary"
-          :icon="useRenderIcon(Plus)"
-          @click="dialogVisible = true"
-          >新增</el-button
-        > -->
-        <el-button
-          :disabled="idList.length > 0 ? false : true"
-          type="danger"
-          :icon="useRenderIcon(Delete)"
-          @click="deleteUserBtn"
-          >批量删除</el-button
-        >
       </el-row>
-      <el-table
-        v-loading="loading"
-        :data="userList"
-        border
-        @selection-change="handleSelectionChange"
-      >
-        <el-table-column type="selection" width="50" />
+      <el-table v-loading="loading" :data="userList" border>
         <el-table-column type="index" align="center" label="#" width="50" />
         <el-table-column
           prop="username"
           align="center"
           label="用户名"
-          width="150"
+          min-width="100"
         />
         <el-table-column prop="avatar" label="头像" align="center" width="100">
           <template v-slot="scope">
@@ -61,44 +42,54 @@
           prop="email"
           align="center"
           label="邮箱"
-          min-width="200"
+          min-width="150"
         />
         <el-table-column prop="role" align="center" label="角色">
           <template #default="scope">
-            <el-tag>{{ scope.row.role == 2 ? "超级管理员" : "用户" }}</el-tag>
+            <el-tag>{{
+              scope.row.role == 2
+                ? "超级管理员"
+                : scope.row.role == 1
+                ? "管理员"
+                : "普通用户"
+            }}</el-tag>
           </template>
         </el-table-column>
         <el-table-column
           prop="create_time"
           align="center"
-          label="创建时间"
-          width="200"
+          label="注册日期"
+          min-width="180"
         />
         <el-table-column
           prop="update_time"
           align="center"
-          label="更新时间"
-          width="200"
+          label="更新日期"
+          min-width="180"
         />
-        <el-table-column prop="address" label="操作">
+        <el-table-column width="200" align="center" prop="status" label="状态">
+          <template #default="scope">
+            <el-switch
+              @change="changeStatus(scope.row)"
+              v-model="scope.row.status"
+              class="mt-2"
+              :active-value="1"
+              :inactive-value="0"
+              inactive-text="正常"
+              active-text="拉黑"
+            />
+          </template>
+        </el-table-column>
+        <el-table-column prop="address" width="80" label="操作" align="center">
           <template #default="scope">
             <div class="btnClass">
-              <el-button link type="primary" :icon="useRenderIcon(EditPen)"
+              <el-button
+                link
+                type="primary"
+                :icon="useRenderIcon(EditPen)"
+                @click="updateBtn(scope.row)"
                 >修改</el-button
               >
-              <el-popconfirm
-                width="220"
-                :title="`是否删除用户 ${scope.row.username} ?`"
-                :icon="useRenderIcon(Warning)"
-                icon-color="#f56c6c"
-                @confirm="deleteUserBtn(scope.row)"
-              >
-                <template #reference>
-                  <el-button link type="danger" :icon="useRenderIcon(Delete)"
-                    >删除</el-button
-                  >
-                </template>
-              </el-popconfirm>
             </div>
           </template>
         </el-table-column>
@@ -117,24 +108,112 @@
         />
       </template>
     </el-card>
+    <el-dialog
+      @close="cancel"
+      title="修改用户信息"
+      v-model="dialogVisible"
+      width="30%"
+    >
+      <el-form :model="userForm" ref="userFormRef" label-width="100px">
+        <el-form-item
+          label="用户名"
+          prop="username"
+          :rules="[
+            {
+              required: true,
+              min: 2,
+              max: 10,
+              message: '用户名长度2-10位 !',
+              trigger: 'blur'
+            }
+          ]"
+        >
+          <el-input
+            v-model="userForm.username"
+            placeholder="请输入用户名称"
+            clearable
+          />
+        </el-form-item>
+        <el-form-item
+          label="邮箱"
+          prop="email"
+          :rules="[
+            {
+              required: true,
+              message: '邮箱不能为空 !',
+              trigger: 'blur'
+            }
+          ]"
+        >
+          <el-input
+            v-model="userForm.email"
+            placeholder="请输入邮箱"
+            clearable
+          />
+        </el-form-item>
+        <el-form-item
+          label="角色"
+          :rules="[
+            {
+              required: true,
+              message: '请选择角色 !',
+              trigger: 'blur'
+            }
+          ]"
+          prop="role"
+        >
+          <el-select v-model="userForm.role" placeholder="请选择角色" clearable>
+            <el-option :key="1" label="普通用户" :value="0" />
+            <el-option :key="2" label="管理员" :value="1" />
+            <el-option :key="2" label="超级管理员" :value="2" />
+          </el-select>
+        </el-form-item>
+        <el-form-item
+          label="头像"
+          :rules="[
+            {
+              required: true,
+              message: '请上传头像 !',
+              trigger: 'blur'
+            }
+          ]"
+          prop="avatar"
+        >
+          <Upload
+            @getFileList="getFileList"
+            v-model:fileList="avatarList"
+            :fileSize="2"
+          />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="cancel">取消</el-button>
+        <el-button type="primary" @click="submit(userFormRef)">
+          确定
+        </el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script setup lang="ts">
+import Search from "@iconify-icons/ep/search";
+// import Plus from "@iconify-icons/ep/plus";
+import Refresh from "@iconify-icons/ep/refresh";
+// import Delete from "@iconify-icons/ep/delete";
+import EditPen from "@iconify-icons/ep/edit-pen";
+// import Warning from "@iconify-icons/ep/warning";
+import { useRenderIcon } from "@/components/ReIcon/src/hooks";
+import Upload from "@/components/ReUpload/index.vue";
+import { getUserList, updateUser, changeUserStatus } from "@/api/user";
+import { uploadFile } from "@/utils/upload";
+import { ref, reactive, onMounted, nextTick } from "vue";
+import { message } from "@/utils/message";
+import type { FormInstance, UploadUserFile } from "element-plus";
 defineOptions({
   // name 作为一种规范最好必须写上并且和路由的name保持一致
   name: "Users"
 });
-import Search from "@iconify-icons/ep/search";
-import Plus from "@iconify-icons/ep/plus";
-import Refresh from "@iconify-icons/ep/refresh";
-import Delete from "@iconify-icons/ep/delete";
-import EditPen from "@iconify-icons/ep/edit-pen";
-import Warning from "@iconify-icons/ep/warning";
-import { useRenderIcon } from "@/components/ReIcon/src/hooks";
-import { getUserList, deleteUser } from "@/api/user";
-import { ref, reactive, onMounted } from "vue";
-import { message } from "@/utils/message";
 // dialog
 const dialogVisible = ref<boolean>(false);
 // 查询参数
@@ -146,13 +225,16 @@ const queryParams = reactive<any>({
 // 表单参数
 const userForm = reactive<any>({
   id: "",
-  username: ""
+  email: "",
+  username: "",
+  role: "",
+  status: ""
 });
+const userFormRef = ref<FormInstance>();
 const loading = ref<boolean>(false);
 const total = ref<number>(0);
 const userList = ref([]);
-// 批量删除存储id
-const idList = ref<number[]>([]);
+const avatarList = ref<UploadUserFile[]>([]);
 onMounted(() => {
   getUsers();
 });
@@ -170,30 +252,87 @@ const reset = () => {
   queryParams.username = "";
   getUsers();
 };
-// checkBox处理
-const handleSelectionChange = (userList: any) => {
-  idList.value = userList.map((userInfo: any) => {
-    return userInfo.id;
+// 修改按钮回调
+const updateBtn = row => {
+  dialogVisible.value = true;
+  // dialog + form resetFields() 无法重置问题
+  nextTick(() => {
+    userForm.id = row.id;
+    userForm.username = row.username;
+    userForm.avatar = row.avatar;
+    userForm.email = row.email;
+    userForm.role = row.role;
+    avatarList.value[0] = {
+      url: row.avatar,
+      name: row.username
+    };
   });
 };
-// 删除
-const deleteUserBtn = (row: any) => {
-  delete userForm.username;
-  if (row.id) {
-    idList.value = [];
-    idList.value.push(row.id);
+// dialog关闭 取消按钮回调
+const cancel = () => {
+  dialogVisible.value = false;
+  userFormRef.value.resetFields();
+  avatarList.value = [];
+};
+const getFileList = fileList => {
+  avatarList.value = fileList;
+};
+// 修改提交按钮
+const submit = async (formEl: FormInstance | undefined) => {
+  if (!formEl) return;
+  if (avatarList.value.length == 0) {
+    // 删除了头像
+    userForm.avatar = "";
   }
-  userForm.id = idList.value;
-  deleteUser(userForm).then(response => {
-    if (response.code == 200) {
-      message("删除成功", { type: "success" });
-      getUsers();
+  if (
+    // 更换了头像
+    avatarList.value.length != 0 &&
+    avatarList.value[0].url != userForm.avatar
+  ) {
+    // 防止删除头像后校验 上传新的头像校验不通过
+    userForm.avatar = "更换了头像";
+  }
+  formEl.validate(async (valid, fields) => {
+    if (
+      // 更换了头像 其他数据校验通过
+      avatarList.value.length != 0 &&
+      avatarList.value[0].url != userForm.avatar &&
+      valid
+    ) {
+      // 上传头像
+      await uploadFile(avatarList.value).then(response => {
+        userForm.avatar = response.url;
+      });
+    }
+
+    if (valid) {
+      // 更新数据
+      delete userForm.status;
+      updateUser(userForm).then(response => {
+        if (response.code == 200) {
+          message("修改成功", { type: "success" });
+          cancel();
+          getUsers();
+        } else {
+          message("修改失败", { type: "error" });
+        }
+      });
     } else {
-      message("删除失败", { type: "error" });
+      return fields;
     }
   });
-  userForm.id = ""; // 重置id
-  idList.value = [];
+};
+// 拉黑/拉出用户
+const changeStatus = row => {
+  userForm.id = row.id;
+  userForm.status = row.status;
+  changeUserStatus(userForm).then(response => {
+    if (response.code == 200) {
+      message("操作成功", { type: "success" });
+    } else {
+      message(response.message, { type: "error" });
+    }
+  });
 };
 </script>
 

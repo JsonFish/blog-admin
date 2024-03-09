@@ -1,7 +1,13 @@
 <template>
   <el-card>
     <template #header>
-      <div style="display: flex; justify-content: space-between">
+      <div
+        style="
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        "
+      >
         <div>新增文章</div>
         <el-row>
           <el-link
@@ -224,10 +230,12 @@ import "md-editor-v3/lib/style.css";
 import { addOrUpdateArticle } from "@/api/article";
 import { getCategoryList } from "@/api/category";
 import { getTagList } from "@/api/tag";
-import { uploadFile } from "@/api/file";
+import { uploadFiles } from "@/api/file";
 import { message } from "@/utils/message";
-import { uploadFileList } from "@/components/ReUpload/upload";
-
+import { uploadFile } from "@/utils/upload";
+defineOptions({
+  name: "AddArticle"
+});
 const articleFormRef = ref<FormInstance>();
 const drawerVisible = ref<boolean>(false);
 const articleForm = reactive({
@@ -279,7 +287,7 @@ const onUploadImg = async (files, callback) => {
       return new Promise((rev, rej) => {
         const form = new FormData();
         form.append("file", file);
-        uploadFile(form)
+        uploadFiles(form)
           .then(res => {
             if (res.code == 200) return rev(res.data);
             message("图片上传失败", { type: "error" });
@@ -296,8 +304,8 @@ const publishArticle = async (formEl: FormInstance | undefined) => {
   if (!formEl) return;
   if (coverList.value.length != 0) {
     // 上传封面
-    const response = await uploadFileList(coverList.value);
-    articleForm.articleCover = response[0].url;
+    const response = await uploadFile(coverList.value);
+    articleForm.articleCover = response.url;
   }
   await formEl.validate(async (valid, fields) => {
     if (valid) {
@@ -320,3 +328,4 @@ const publishArticle = async (formEl: FormInstance | undefined) => {
   });
 };
 </script>
+@/utils/upload

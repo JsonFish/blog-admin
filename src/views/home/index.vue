@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import Upload from "@/components/ReUpload/test.vue";
-import { uploadFile } from "@/api/file";
+import { uploadFiles } from "@/api/file";
 defineOptions({
   name: "Home"
 });
@@ -18,7 +18,7 @@ const uploadFun = async () => {
       const form = new FormData();
       form.append("file", file.raw);
       return new Promise((rev, rej) => {
-        uploadFile(form)
+        uploadFiles(form)
           .then(res => rev(res.data))
           .catch(error => rej(error));
       });

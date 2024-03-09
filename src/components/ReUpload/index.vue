@@ -19,12 +19,7 @@
       <el-icon class="avatar-uploader-icon"><Plus /></el-icon>
       <template #file="{ file }">
         <div>
-          <el-image
-            :style="{ width: width + 'px', height: height + 'px' }"
-            fit="cover"
-            :src="file.url"
-            lazy
-          />
+          <el-image fit="cover" :src="file.url" lazy />
           <span class="el-upload-list__item-actions">
             <span class="el-upload-list__item-preview" @click="perview(file)">
               <el-icon><zoom-in /></el-icon>

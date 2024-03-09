@@ -127,7 +127,7 @@
       width="30%"
       :before-close="cancel"
     >
-      <el-form :model="categoryForm" ref="dialogFormRef" label-width="100px">
+      <el-form :model="categoryForm" ref="categoryFormRef" label-width="100px">
         <el-form-item
           label="分类"
           prop="categoryName"
@@ -167,7 +167,7 @@
       </el-form>
       <template #footer>
         <el-button @click="cancel">取消</el-button>
-        <el-button type="primary" @click="submit(dialogFormRef)">
+        <el-button type="primary" @click="submit(categoryFormRef)">
           确定
         </el-button>
       </template>
@@ -196,7 +196,7 @@ import {
   updateCategory,
   deleteCategory
 } from "@/api/category";
-import { uploadFileList } from "@/components/ReUpload/upload";
+import { uploadFile } from "@/utils/upload";
 import { message } from "@/utils/message";
 import type { FormInstance, UploadUserFile } from "element-plus";
 defineOptions({
@@ -209,7 +209,7 @@ const queryParams = reactive<QueryParams>({
   pageSize: 10
 });
 const queryFormRef = ref<FormInstance>();
-const dialogFormRef = ref<FormInstance>();
+const categoryFormRef = ref<FormInstance>();
 
 const categoryImageList = ref<UploadUserFile[]>([]);
 const categoryForm = reactive<CategoryForm>({
@@ -248,7 +248,7 @@ const reset = () => {
 // dialog取消按钮回调
 const cancel = () => {
   dialogVisible.value = false;
-  dialogFormRef.value.resetFields();
+  categoryFormRef.value.resetFields();
   categoryForm.id = ""; // id不能重置
   categoryImageList.value = [];
 };
@@ -269,7 +269,6 @@ const updateBtn = (row: CategoryInfo) => {
 
 // 获取要上传的文件
 const getFileList = fileList => {
-  console.log(fileList);
   categoryImageList.value = fileList;
 };
 
@@ -286,8 +285,8 @@ const submit = async (formEl: FormInstance | undefined) => {
       categoryImageList.value.length != 0 &&
       categoryImageList.value[0].url != categoryForm.categoryImage
     ) {
-      await uploadFileList(categoryImageList.value).then(response => {
-        categoryForm.categoryImage = response[0].url;
+      await uploadFile(categoryImageList.value).then(response => {
+        categoryForm.categoryImage = response.url;
       });
     }
     // 再校验
@@ -310,8 +309,8 @@ const submit = async (formEl: FormInstance | undefined) => {
     // 添加
     // 先上传封面
     if (categoryImageList.value.length != 0) {
-      await uploadFileList(categoryImageList.value).then(response => {
-        categoryForm.categoryImage = response[0].url;
+      await uploadFile(categoryImageList.value).then(response => {
+        categoryForm.categoryImage = response.url;
       });
     }
     // 再校验
@@ -360,3 +359,4 @@ const deleteBtn = (row: CategoryInfo | any) => {
 </script>
 
 <style lang="scss" scoped></style>
+@/utils/upload

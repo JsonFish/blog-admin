@@ -1,14 +1,13 @@
 import { http } from "@/utils/http";
-
-export const uploadFile = (data: any) => {
-  return http.request<BaseResponse<any>>(
+import { FileData } from "./type";
+export const uploadFiles = (data: FormData) => {
+  return http.request<BaseResponse<FileData>>(
     "post",
     "/file/upload",
     { data },
     {
       headers: {
-        "Content-Type": "multipart/form-data",
-        "X-Requested-With": "XMLHttpRequest"
+        "Content-Type": "multipart/form-data"
       }
     }
   );
