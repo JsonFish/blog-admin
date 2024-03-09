@@ -66,7 +66,7 @@ export function setToken(data: DataInfo<Date>) {
     const username =
       storageSession().getItem<DataInfo<number>>(sessionKey)?.username ?? "";
     const role =
-      storageSession().getItem<DataInfo<number>>(sessionKey)?.role ?? [];
+      storageSession().getItem<DataInfo<number>>(sessionKey)?.role ?? 0;
     setSessionKey(username, role);
   }
 }

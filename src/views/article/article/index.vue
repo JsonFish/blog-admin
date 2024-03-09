@@ -9,7 +9,6 @@ import Warning from "@iconify-icons/ep/warning";
 import { useRenderIcon } from "@/components/ReIcon/src/hooks";
 import { ref, reactive, onMounted } from "vue";
 import { getArticle } from "@/api/article";
-import { getCategoryList } from "@/api/category";
 // 查询参数
 const queryParams = reactive({
   articleTitle: "",
@@ -18,13 +17,9 @@ const queryParams = reactive({
   status: 0
 });
 const articleList = ref();
-const categoryList = ref([]);
 const loading = ref<boolean>(false);
 onMounted(() => {
   getArticleLsit();
-  getCategoryList().then(response => {
-    categoryList.value = response.data.categoryList;
-  });
 });
 
 const getArticleLsit = () => {
@@ -33,11 +28,6 @@ const getArticleLsit = () => {
     articleList.value = response.data.articleList;
     loading.value = false;
   });
-
-  // const getCategoryNameById = id => {
-  //   const category = categoryList.value.find(item => item.id === id);
-  //   return category.categoryName;
-  // };
 };
 </script>
 
@@ -80,15 +70,13 @@ const getArticleLsit = () => {
             width="80"
           >
             <template #default="scope">
-              <el-tag>
-                {{ scope.row.categoryId }}
-              </el-tag>
+              <el-tag> {{ scope.row.categoryId }} </el-tag>
             </template>
           </el-table-column>
           <el-table-column align="center" prop="tagIds" label="标签" />
           <el-table-column align="center" prop="type" label="类型" width="80">
             <template #default="scope">
-              <el-tag type="primary">
+              <el-tag>
                 {{
                   scope.row.type == 0
                     ? "原创"
