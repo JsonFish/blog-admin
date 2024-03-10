@@ -2,23 +2,23 @@
   <div>
     <el-card>
       <template #header>
-        <div>分类管理</div>
+        <div>标签管理</div>
       </template>
       <el-row>
         <el-form :model="queryParams" :inline="true" ref="queryFormRef">
-          <el-form-item label="搜索分类">
+          <el-form-item label="标签名称">
             <el-input
-              v-model="queryParams.categoryName"
-              placeholder="请输入分类名称"
-              prop="categoryName"
+              v-model="queryParams.tagName"
+              placeholder="请输入标签名称"
+              prop="tagName"
             />
           </el-form-item>
         </el-form>
         <el-button
-          :disabled="!queryParams.categoryName"
+          :disabled="!queryParams.tagName"
           type="primary"
           :icon="useRenderIcon(Search)"
-          @click="getCategoryInfo"
+          @click="getTagInfo"
           >搜索</el-button
         >
         <el-button type="info" :icon="useRenderIcon(Refresh)" @click="reset"
@@ -34,37 +34,25 @@
           :disabled="idList.length > 0 ? false : true"
           type="danger"
           :icon="useRenderIcon(Delete)"
-          @click="deleteBtn"
+          @click="deleteTagBtn"
           >批量删除</el-button
         >
       </el-row>
       <el-table
+        stripe
         v-loading="loading"
-        :data="categoryList"
+        :data="tagList"
         border
         @selection-change="handleSelectionChange"
       >
-        <el-table-column type="selection" width="50" align="center" />
+        <el-table-column type="selection" width="50" />
         <el-table-column type="index" align="center" label="#" width="60" />
         <el-table-column
-          prop="categoryName"
+          prop="tagName"
           align="center"
-          label="分类"
+          label="标签名称"
           width="200"
         />
-        <el-table-column
-          prop="categoryImage"
-          label="封面"
-          align="center"
-          width="200"
-        >
-          <template v-slot="scope">
-            <el-image
-              style="height: 50px; margin-bottom: -5px"
-              :src="scope.row.categoryImage"
-            />
-          </template>
-        </el-table-column>
         <el-table-column
           prop="create_time"
           align="center"
@@ -89,10 +77,10 @@
               >
               <el-popconfirm
                 width="220"
-                :title="`是否删除分类: ${scope.row.categoryName} ?`"
+                :title="`是否删除标签 ${scope.row.tagName} ?`"
                 :icon="useRenderIcon(Warning)"
                 icon-color="#f56c6c"
-                @confirm="deleteBtn(scope.row)"
+                @confirm="deleteTagBtn(scope.row)"
               >
                 <template #reference>
                   <el-button link type="danger" :icon="useRenderIcon(Delete)"
@@ -113,61 +101,43 @@
           background
           layout="->,total, sizes, prev, pager, next,jumper"
           :total="total"
-          @size-change="getCategoryInfo"
-          @current-change="getCategoryInfo"
+          @size-change="getTagInfo"
+          @current-change="getTagInfo"
         />
       </template>
     </el-card>
-    <!-- dialog -->
     <el-dialog
       :close-on-click-modal="false"
       append-to-body
-      :title="categoryForm.id ? '修改分类' : '新增分类'"
+      :title="tagForm.id ? '修改标签' : '新增标签'"
       v-model="dialogVisible"
       width="30%"
       :before-close="cancel"
     >
-      <el-form :model="categoryForm" ref="categoryFormRef" label-width="100px">
+      <el-form :model="tagForm" ref="dialogFormRef" label-width="100px">
         <el-form-item
-          label="分类"
-          prop="categoryName"
+          label="标签名称"
           :rules="[
             {
               required: true,
               min: 2,
               max: 10,
-              message: '分类名长度2-10位 !',
+              message: '标签长度2-15位!',
               trigger: 'blur'
             }
           ]"
+          prop="tagName"
         >
           <el-input
-            v-model="categoryForm.categoryName"
-            placeholder="请输入分类名称"
+            v-model="tagForm.tagName"
+            placeholder="请输入标签名称"
             clearable
-          />
-        </el-form-item>
-        <el-form-item
-          label="封面"
-          :rules="[
-            {
-              required: true,
-              message: '请上传封面 !',
-              trigger: 'blur'
-            }
-          ]"
-          prop="categoryImage"
-        >
-          <Upload
-            @getFileList="getFileList"
-            v-model:fileList="categoryImageList"
-            :fileSize="5"
           />
         </el-form-item>
       </el-form>
       <template #footer>
         <el-button @click="cancel">取消</el-button>
-        <el-button type="primary" @click="submit(categoryFormRef)">
+        <el-button type="primary" @click="submit(dialogFormRef)">
           确定
         </el-button>
       </template>
@@ -183,58 +153,42 @@ import Delete from "@iconify-icons/ep/delete";
 import EditPen from "@iconify-icons/ep/edit-pen";
 import Warning from "@iconify-icons/ep/warning";
 import { useRenderIcon } from "@/components/ReIcon/src/hooks";
-import Upload from "@/components/ReUpload/index.vue";
 import { onMounted, ref, reactive, nextTick } from "vue";
-import type {
-  CategoryInfo,
-  QueryParams,
-  CategoryForm
-} from "@/api/category/type";
-import {
-  getCategoryList,
-  addCategory,
-  updateCategory,
-  deleteCategory
-} from "@/api/category";
-import { uploadFile } from "@/utils/upload";
+import type { TagInfo, QueryParams, TagForm } from "@/api/tag/type";
+import { getTagList, deleteTag, addTag, updateTag } from "@/api/tag";
 import { message } from "@/utils/message";
-import type { FormInstance, UploadUserFile } from "element-plus";
+import { type FormInstance } from "element-plus";
 defineOptions({
-  name: "Category"
+  name: "Tag"
 });
-
+// 查询参数
 const queryParams = reactive<QueryParams>({
-  categoryName: "",
+  tagName: "",
   currentPage: 1,
   pageSize: 10
 });
 const queryFormRef = ref<FormInstance>();
-const categoryFormRef = ref<FormInstance>();
-
-const categoryImageList = ref<UploadUserFile[]>([]);
-const categoryForm = reactive<CategoryForm>({
+const dialogFormRef = ref<FormInstance>();
+const tagForm = reactive<TagForm>({
   id: "",
-  categoryName: "",
-  categoryImage: ""
+  tagName: ""
 });
 const total = ref<number>(0);
 const loading = ref<boolean>(false);
 const dialogVisible = ref<boolean>(false);
-
-const categoryList = ref<CategoryInfo[]>();
-
-// 存储批量删除分类id
+// tag列表
+const tagList = ref<TagInfo[]>();
+// 存储批量删除标签id
 const idList = ref<Array<number>>([]);
-
 onMounted(() => {
-  getCategoryInfo();
+  getTagInfo();
 });
 
-// 获取category数据
-const getCategoryInfo = () => {
+// 获取tag数据
+const getTagInfo = () => {
   loading.value = true;
-  getCategoryList(queryParams).then(response => {
-    categoryList.value = response.data.categoryList;
+  getTagList(queryParams).then(response => {
+    tagList.value = response.data.tagList;
     total.value = response.data.total;
     loading.value = false;
   });
@@ -242,119 +196,84 @@ const getCategoryInfo = () => {
 // 重置按钮回调
 const reset = () => {
   // queryFormRef.value.resetFields(); // 无法重置
-  queryParams.categoryName = "";
-  getCategoryInfo();
+  queryParams.tagName = "";
+  getTagInfo();
 };
 // dialog取消按钮回调
 const cancel = () => {
   dialogVisible.value = false;
-  categoryFormRef.value.resetFields();
-  categoryForm.id = ""; // id不能重置
-  categoryImageList.value = [];
+  dialogFormRef.value.resetFields();
+  tagForm.id = ""; // id不能重置
 };
 // 修改按钮回调
-const updateBtn = (row: CategoryInfo) => {
+const updateBtn = (row: TagInfo) => {
   dialogVisible.value = true;
   // dialog + form resetFields() 无法重置问题
   nextTick(() => {
-    categoryForm.id = row.id;
-    categoryForm.categoryName = row.categoryName;
-    categoryForm.categoryImage = row.categoryImage;
-    categoryImageList.value[0] = {
-      url: row.categoryImage,
-      name: row.categoryName
-    };
+    tagForm.id = row.id;
+    tagForm.tagName = row.tagName;
   });
-};
-
-// 获取要上传的文件
-const getFileList = fileList => {
-  categoryImageList.value = fileList;
 };
 
 // dialog确定按钮回调
-const submit = async (formEl: FormInstance | undefined) => {
+const submit = (formEl: FormInstance | undefined) => {
   if (!formEl) return;
-  if (categoryForm.id) {
-    // 修改
-    // 先判断是否更换封面
-    if (categoryImageList.value.length == 0) {
-      categoryForm.categoryImage = "";
-    }
-    if (
-      categoryImageList.value.length != 0 &&
-      categoryImageList.value[0].url != categoryForm.categoryImage
-    ) {
-      await uploadFile(categoryImageList.value).then(response => {
-        categoryForm.categoryImage = response.url;
-      });
-    }
-    // 再校验
-    formEl.validate(async (valid, fields) => {
-      if (valid) {
-        updateCategory(categoryForm).then(response => {
+  formEl.validate((valid, fields) => {
+    if (valid) {
+      if (tagForm.id) {
+        updateTag(tagForm).then(response => {
           if (response.code == 200) {
             message("修改成功", { type: "success" });
-            getCategoryInfo();
-            cancel();
+            dialogVisible.value = false;
+            dialogFormRef.value.resetFields();
+            getTagInfo();
+            tagForm.id = "";
           } else {
             message(response.message, { type: "error" });
           }
         });
       } else {
-        return fields;
-      }
-    });
-  } else {
-    // 添加
-    // 先上传封面
-    if (categoryImageList.value.length != 0) {
-      await uploadFile(categoryImageList.value).then(response => {
-        categoryForm.categoryImage = response.url;
-      });
-    }
-    // 再校验
-    formEl.validate((valid, fields) => {
-      if (valid) {
-        delete categoryForm.id;
-        addCategory(categoryForm).then(response => {
+        delete tagForm.id;
+        addTag(tagForm).then(response => {
           if (response.code == 200) {
             message("添加成功", { type: "success" });
-            cancel();
-            getCategoryInfo();
+            dialogVisible.value = false;
+            dialogFormRef.value.resetFields();
+            getTagInfo();
           } else {
             message(response.message, { type: "error" });
           }
         });
-      } else {
-        return fields;
       }
-    });
-  }
+    } else {
+      return fields;
+    }
+  });
 };
 // checkBox处理
-const handleSelectionChange = (categoryList: CategoryInfo[]) => {
-  idList.value = categoryList.map((categoryInfo: CategoryInfo) => {
-    return categoryInfo.id;
+const handleSelectionChange = (tagList: TagInfo[]) => {
+  idList.value = tagList.map((tagInfo: TagInfo) => {
+    return tagInfo.id;
   });
 };
 // 删除按钮回调
-const deleteBtn = (row: CategoryInfo | any) => {
-  delete categoryForm.categoryName;
+const deleteTagBtn = (row: TagInfo | any) => {
+  delete tagForm.tagName;
   if (row.id) {
     idList.value = [];
     idList.value.push(row.id);
   }
-  categoryForm.id = idList.value;
-  deleteCategory(categoryForm).then(response => {
+  tagForm.id = idList.value;
+  deleteTag(tagForm).then(response => {
     if (response.code == 200) {
       message("删除成功", { type: "success" });
-      getCategoryInfo();
+      getTagInfo();
     } else {
-      message(response.message, { type: "error" });
+      message("删除失败", { type: "error" });
     }
   });
-  categoryForm.id = ""; // 重置id
+  tagForm.id = ""; // 重置id
+  idList.value = [];
 };
 </script>
 

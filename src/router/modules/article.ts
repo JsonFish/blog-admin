@@ -15,7 +15,7 @@ export default {
     {
       path: "/article/manage",
       name: "ArticleManage",
-      component: () => import("@/views/article/article/index.vue"),
+      component: () => import("@/views/article/index.vue"),
       meta: {
         title: "文章管理",
         icon: Document
@@ -24,7 +24,7 @@ export default {
     {
       path: "/article/add",
       name: "AddArticle",
-      component: () => import("@/views/article/editArticle/index.vue"),
+      component: () => import("@/views/editArticle/index.vue"),
       meta: {
         title: "新增文章",
         icon: Edit,
@@ -34,7 +34,7 @@ export default {
     {
       path: "/category",
       name: "Category",
-      component: () => import("@/views/article/category/index.vue"),
+      component: () => import("@/views/category/index.vue"),
       meta: {
         title: "分类管理",
         icon: specialColumn
@@ -43,7 +43,7 @@ export default {
     {
       path: "/tag",
       name: "Tag",
-      component: () => import("@/views/article/tag/index.vue"),
+      component: () => import("@/views/tag/index.vue"),
       meta: {
         title: "标签管理",
         icon: Tag
