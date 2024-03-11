@@ -2,13 +2,7 @@
   <div>
     <el-card>
       <template #header>
-        <div
-          style="
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-          "
-        >
+        <div class="header">
           <div>新增文章</div>
           <el-row>
             <el-link
@@ -30,7 +24,7 @@
         </div>
       </template>
       <MdEditor
-        style="height: 70vh"
+        style="height: 72vh"
         v-model="articleForm.articleContent"
         @onUploadImg="onUploadImg"
       />
@@ -141,6 +135,7 @@
             </el-select>
           </el-form-item>
           <el-form-item
+            class="upload"
             label="封面"
             prop="articleCover"
             :rules="[
@@ -152,7 +147,7 @@
           >
             <Upload
               :limit="1"
-              :fileSize="3"
+              :fileSize="5"
               @getFileList="getFileList"
               v-model:fileList="coverList"
             />
@@ -407,3 +402,35 @@ const savaDraft = (formEl: FormInstance | undefined) => {
   });
 };
 </script>
+<style lang="css" scoped>
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.upload {
+  :deep(.el-form-item__content) {
+    width: 320px !important;
+    height: 180px !important;
+  }
+
+  :deep(.el-upload-list__item) {
+    width: 320px !important;
+    height: 180px !important;
+    margin: 0 !important;
+    border: none !important;
+  }
+
+  :deep(.el-upload--picture-card) {
+    width: 320px !important;
+    height: 180px !important;
+  }
+
+  :deep(.el-upload-list--picture-card) {
+    width: 320px !important;
+    height: 180px !important;
+    margin: 0 !important;
+    border: none !important;
+  }
+}
+</style>

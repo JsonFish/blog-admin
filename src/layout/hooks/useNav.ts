@@ -33,10 +33,10 @@ export function useNav() {
 
   /** 用户名 */
   const username = computed(() => {
-    return useUserStoreHook().username;
+    return localStorage.getItem("username");
   });
   const userAvatar = computed(() => {
-    return useUserStoreHook().avatar;
+    return localStorage.getItem("avatar");
   });
   const avatarsStyle = computed(() => {
     return username.value ? { marginRight: "10px" } : "";

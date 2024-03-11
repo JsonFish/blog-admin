@@ -8,7 +8,6 @@ import type { FormInstance } from "element-plus";
 import { useLayout } from "@/layout/hooks/useLayout";
 // import { initRouter, getTopMenu } from "@/router/utils";
 
-import { setToken } from "@/utils/auth";
 import { addPathMatch } from "@/router/utils";
 import { usePermissionStoreHook } from "@/store/modules/permission";
 
@@ -41,14 +40,12 @@ dataThemeChange();
 // 图片验证码 base64格式
 const captchaImage = ref<string>();
 const loginForm = reactive({
-  // email: "test@qq.com",
-  // password: "admin123",
-  // captcha: ""
   email: "1557392527@qq.com",
   password: "123456",
   code: "",
   captchaId: ""
 });
+
 // 获取图片验证码
 const getCaptchaImg = async () => {
   loginForm.code = "";
@@ -56,38 +53,44 @@ const getCaptchaImg = async () => {
   captchaImage.value = `data:image/jpg;base64,${result.data.imageBase64}`;
   loginForm.captchaId = result.data.id;
 };
-getCaptchaImg();
+
+// 节流
+let timer = null;
+const getCaptchaThrottle = () => {
+  if (timer == null) {
+    timer = setTimeout(async () => {
+      loginForm.code = "";
+      getCaptchaImg();
+      clearTimeout(timer);
+      timer = null;
+    }, 500);
+  }
+};
 // 登录
 const onLogin = async (formEl: FormInstance | undefined) => {
-  loading.value = true;
   if (!formEl) return;
   await formEl.validate(async (valid, fields) => {
     // fields 校验提示消息
     if (valid) {
+      loading.value = true;
       useUserStore()
         .loginByEmail(loginForm)
         .then(
-          res => {
+          response => {
+            console.log(response);
             // 静态路由模式
-            console.log(res);
             usePermissionStoreHook().handleWholeMenus([]);
             addPathMatch();
-            setToken({
-              accessToken: res.data.accessToken,
-              refreshToken: res.data.refreshToken
-            } as any);
             router.push("/");
             message("登录成功", { type: "success" });
           },
           reason => {
             message(reason.message, { type: "error" });
-            getCaptchaImg();
             loading.value = false;
-            return fields;
+            getCaptchaImg();
           }
         );
     } else {
-      loading.value = false;
       return fields;
     }
   });
@@ -102,6 +105,7 @@ function onkeypress({ code }: KeyboardEvent) {
 
 onMounted(() => {
   window.document.addEventListener("keypress", onkeypress);
+  getCaptchaImg();
 });
 
 onBeforeUnmount(() => {
@@ -193,7 +197,7 @@ onBeforeUnmount(() => {
 
                 <div
                   style="width: 30%; height: 100%; margin-left: 5%"
-                  @click="getCaptchaImg"
+                  @click="getCaptchaThrottle"
                 >
                   <img
                     style="width: 100%; height: 100%"

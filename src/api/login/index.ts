@@ -6,8 +6,6 @@ export interface LoginResult {
     avatar: string;
     /** 用户名 */
     username: string;
-    /** 当前登陆用户的角色 */
-    role: number;
     /** `token` */
     accessToken: string;
     /** 用于调用刷新`accessToken`的接口时所需的`token` */

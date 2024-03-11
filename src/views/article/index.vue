@@ -56,7 +56,7 @@ const tabClick = (tabPane: any) => {
           >
         </div>
       </template>
-      <el-row>
+      <el-row style="margin-top: -13px; height: 35px">
         <el-form :model="queryParams" :inline="true" ref="queryFormRef">
           <el-form-item label="搜索标题">
             <el-input
@@ -77,7 +77,7 @@ const tabClick = (tabPane: any) => {
           >重置</el-button
         >
       </el-row>
-      <el-tabs :model-value="0" type="border-card" @tab-click="tabClick">
+      <el-tabs :model-value="0" @tab-click="tabClick">
         <el-tab-pane label="已发布" :name="0">
           <el-table stripe border :data="articleList" v-loading="loading">
             <el-table-column type="selection" width="40" align="center" />
@@ -92,12 +92,20 @@ const tabClick = (tabPane: any) => {
               prop="articleSummary"
               label="摘要"
             />
-            <el-table-column prop="articleCover" align="center" label="封面">
+            <el-table-column
+              prop="articleCover"
+              align="center"
+              label="封面"
+              min-width="120px"
+            >
               <template #default="scope">
                 <el-image
-                  style="width: 90px; height: 50px"
+                  preview-teleported
+                  hide-on-click-modal
+                  :preview-src-list="[scope.row.articleCover]"
+                  style="width: 160px; height: 90px"
                   :src="scope.row.articleCover"
-                  fit="fill"
+                  fit="cover"
                 />
               </template>
             </el-table-column>
@@ -148,7 +156,7 @@ const tabClick = (tabPane: any) => {
               label="修改时间"
               min-width="100"
             />
-            <el-table-column prop="address" label="操作" min-width="100">
+            <el-table-column label="操作" min-width="100">
               <template #default="scope">
                 <div class="btnClass">
                   <el-button link type="primary" :icon="useRenderIcon(EditPen)"
@@ -156,7 +164,7 @@ const tabClick = (tabPane: any) => {
                   >
                   <el-popconfirm
                     width="220"
-                    :title="`是否删除分类: ${scope.row.articleTitle} ?`"
+                    :title="`是否删除文章: ${scope.row.articleTitle} ?`"
                     :icon="useRenderIcon(Warning)"
                     icon-color="#f56c6c"
                   >
@@ -188,12 +196,20 @@ const tabClick = (tabPane: any) => {
               prop="articleSummary"
               label="摘要"
             />
-            <el-table-column prop="articleCover" align="center" label="封面">
+            <el-table-column
+              min-width="120px"
+              prop="articleCover"
+              align="center"
+              label="封面"
+            >
               <template #default="scope">
                 <el-image
-                  style="width: 90px; height: 50px"
+                  preview-teleported
+                  hide-on-click-modal
+                  :preview-src-list="[scope.row.articleCover]"
+                  style="width: 160px; height: 90px"
                   :src="scope.row.articleCover"
-                  fit="fill"
+                  fit="cover"
                 />
               </template>
             </el-table-column>
@@ -284,7 +300,7 @@ const tabClick = (tabPane: any) => {
               prop="articleContent"
               label="文章内容"
               show-overflow-tooltip
-              min-width="200"
+              width="200"
             />
             <el-table-column
               align="center"
@@ -302,7 +318,7 @@ const tabClick = (tabPane: any) => {
               <template #default="scope">
                 <div class="btnClass">
                   <el-button link type="primary" :icon="useRenderIcon(EditPen)"
-                    >修改</el-button
+                    >编辑</el-button
                   >
                   <el-popconfirm
                     width="220"

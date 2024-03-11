@@ -44,6 +44,7 @@
         :data="tagList"
         border
         @selection-change="handleSelectionChange"
+        style="height: calc(100vh - 320px)"
       >
         <el-table-column type="selection" width="50" />
         <el-table-column type="index" align="center" label="#" width="60" />

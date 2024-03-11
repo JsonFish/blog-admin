@@ -44,6 +44,7 @@
         :data="categoryList"
         border
         @selection-change="handleSelectionChange"
+        style="height: calc(100vh - 320px)"
       >
         <el-table-column type="selection" width="50" align="center" />
         <el-table-column type="index" align="center" label="#" width="60" />
@@ -61,8 +62,12 @@
         >
           <template v-slot="scope">
             <el-image
-              style="height: 50px; margin-bottom: -5px"
+              preview-teleported
+              hide-on-click-modal
+              :preview-src-list="[scope.row.categoryImage]"
+              style="width: 128px; height: 72px"
               :src="scope.row.categoryImage"
+              fit="cover"
             />
           </template>
         </el-table-column>
@@ -149,6 +154,7 @@
           />
         </el-form-item>
         <el-form-item
+          class="upload"
           label="封面"
           :rules="[
             {
@@ -356,7 +362,34 @@ const deleteBtn = (row: CategoryInfo | any) => {
     }
   });
   categoryForm.id = ""; // 重置id
+  idList.value = [];
 };
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.upload {
+  :deep(.el-form-item__content) {
+    width: 208px !important;
+    height: 117px !important;
+  }
+
+  :deep(.el-upload-list__item) {
+    width: 208px !important;
+    height: 117px !important;
+    margin: 0 !important;
+    border: none !important;
+  }
+
+  :deep(.el-upload--picture-card) {
+    width: 208px !important;
+    height: 117px !important;
+  }
+
+  :deep(.el-upload-list--picture-card) {
+    width: 208px !important;
+    height: 117px !important;
+    margin: 0 !important;
+    border: none !important;
+  }
+}
+</style>

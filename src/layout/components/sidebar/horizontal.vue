@@ -17,7 +17,7 @@ const {
   logout,
   backTopMenu,
   onPanel,
-  email,
+  username,
   userAvatar,
   avatarsStyle
 } = useNav();
@@ -63,7 +63,7 @@ nextTick(() => {
       <el-dropdown trigger="click">
         <span class="el-dropdown-link navbar-bg-hover">
           <img :src="userAvatar" :style="avatarsStyle" />
-          <p v-if="email" class="dark:text-white">{{ email }}</p>
+          <p v-if="username" class="dark:text-white">{{ username }}</p>
         </span>
         <template #dropdown>
           <el-dropdown-menu class="logout">

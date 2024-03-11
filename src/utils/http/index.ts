@@ -13,13 +13,9 @@ import { stringify } from "qs";
 
 // 进度条
 import NProgress from "../progress";
-// import { setToken } from "@/utils/auth";
-import { getTokens, formatToken } from "@/utils/auth";
+import { getToken, formatToken } from "@/utils/auth";
 import { useUserStore } from "@/store/modules/user";
-// import { refreshTokenApi } from "@/api/user";
 import { message } from "@/utils/message";
-// import { useRouter } from "vue-router";
-// const router = useRouter();
 // 相关配置请参考：www.axios-js.com/zh-cn/docs/#axios-request-config-1
 const defaultConfig: AxiosRequestConfig = {
   // 请求超时时间
@@ -50,32 +46,18 @@ class PureHttp {
   /** 保存当前Axios实例对象 */
   private static axiosInstance: AxiosInstance = Axios.create(defaultConfig);
 
-  /** 重连原始请求 */
-  // private static retryOriginalRequest(config: PureHttpRequestConfig) {
-  //   return new Promise(resolve => {
-  //     PureHttp.requests.push((token: string) => {
-  //       config.headers["Authorization"] = formatToken(token);
-  //       resolve(config);
-  //     });
-  //   });
-  // }
-
   /** 请求拦截 */
   private httpInterceptorsRequest(): void {
     PureHttp.axiosInstance.interceptors.request.use(
       async (config: PureHttpRequestConfig): Promise<any> => {
-        // if (!getTokens("accessToken")) {
-        //   console.log("accessToken", getTokens("accessToken"));
-        //   return config;
-        // }
-        // 如果是刷新token接口 将refreshToken放到Authorization字段中
+        // 如果是刷新token接口 更换token
         if (config.url == "/refreshToken") {
           config.headers["Authorization"] = formatToken(
-            getTokens("refreshToken")
+            getToken("refreshToken")
           );
         } else {
           config.headers["Authorization"] = formatToken(
-            getTokens("accessToken")
+            getToken("accessToken")
           );
         }
 
@@ -90,44 +72,6 @@ class PureHttp {
           PureHttp.initConfig.beforeRequestCallback(config);
           return config;
         }
-        /** 请求白名单，放置一些不需要token的接口（通过设置请求白名单，防止token过期后再请求造成的死循环问题） */
-        // const whiteList = ["/refreshToken", "/user/login"];
-        // return whiteList.some(v => config.url.indexOf(v) > -1)
-        //   ? config
-        //   : new Promise(resolve => {
-        //       const data = getToken();
-        //       if (data) {
-        //         // 获取当前时间
-        //         const now = new Date().getTime();
-        //         // 获取accessToken过期时间
-        //         const expired = parseInt(data.expires) - now <= 0;
-        //         if (expired) {
-        //           if (!PureHttp.isRefreshing) {
-        //             PureHttp.isRefreshing = true;
-        //             // token过期刷新
-        //             useUserStoreHook()
-        //               .handRefreshToken({ refreshToken: data.refreshToken })
-        //               .then(res => {
-        //                 const token = res.data.accessToken;
-        //                 config.headers["Authorization"] = formatToken(token);
-        //                 PureHttp.requests.forEach(cb => cb(token));
-        //                 PureHttp.requests = [];
-        //               })
-        //               .finally(() => {
-        //                 PureHttp.isRefreshing = false;
-        //               });
-        //           }
-        //           resolve(PureHttp.retryOriginalRequest(config));
-        //         } else {
-        //           config.headers["Authorization"] = formatToken(
-        //             data.accessToken
-        //           );
-        //           resolve(config);
-        //         }
-        //       } else {
-        //         resolve(config);
-        //       }
-        //     });
         return config;
       },
       error => {
@@ -154,11 +98,6 @@ class PureHttp {
           PureHttp.initConfig.beforeResponseCallback(response);
           return response.data;
         }
-        // 无权限操作数据
-        // if (response.data.code == 403) {
-        //   message(response.data.message, { type: "error" });
-        //   return;
-        // }
 
         return response.data;
       },
@@ -224,7 +163,8 @@ class PureHttp {
               // });
             });
           }
-        } // refreshToken 过期
+        }
+        // refreshToken 过期
         else if (
           error.response.status === 401 &&
           error.config.url == "/refreshToken"

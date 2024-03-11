@@ -11,7 +11,7 @@
       :on-preview="perview"
       :on-remove="remove"
       :limit="limit"
-      :auto-upload="autoUpload"
+      :auto-upload="true"
       :on-change="change"
       :on-exceed="handleExceed"
       :http-request="handleFileUpload"
@@ -19,12 +19,7 @@
       <el-icon class="avatar-uploader-icon"><Plus /></el-icon>
       <template #file="{ file }">
         <div>
-          <el-image
-            :style="{ width: width + 'px', height: height + 'px' }"
-            fit="cover"
-            :src="file.url"
-            lazy
-          />
+          <el-image fit="cover" :src="file.url" />
           <span class="el-upload-list__item-actions">
             <span class="el-upload-list__item-preview" @click="perview(file)">
               <el-icon><zoom-in /></el-icon>
@@ -50,7 +45,7 @@
 
 <script lang="ts" setup>
 import { ref, watch } from "vue";
-import type { UploadInstance } from "element-plus";
+import type { UploadInstance, UploadRequestHandler } from "element-plus";
 import { message } from "@/utils/message";
 import { Plus, Delete, ZoomIn } from "@element-plus/icons-vue";
 import type { UploadProps } from "element-plus";
@@ -75,21 +70,6 @@ const props = defineProps({
   fileList: {
     type: Array<object>,
     default: () => {}
-  },
-  // 是否自动上传
-  autoUpload: {
-    type: Boolean,
-    default: true
-  },
-  // 宽
-  width: {
-    type: Number,
-    default: 200
-  },
-  // 高
-  height: {
-    type: Number,
-    default: 200
   }
   // 文件类型, 例如'png', 'jpg', 'jpeg',字符串，英文逗号隔开
   // fileType: {
@@ -133,8 +113,10 @@ const handleExceed = () => {
   message(`最多上传 ${props.limit} 个文件!`, { type: "error" });
 };
 
-// 自定义上传函数 参数为上传的文件
-const handleFileUpload = () => {};
+// 自定义上传函数 参数为上传的文件 覆盖xhr
+const handleFileUpload: UploadRequestHandler = () => {
+  return new Promise(() => {});
+};
 
 // 监听 uploadFileList.value
 watch(

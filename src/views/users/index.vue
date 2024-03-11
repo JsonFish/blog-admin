@@ -25,7 +25,12 @@
           >重置</el-button
         >
       </el-row>
-      <el-table v-loading="loading" :data="userList" border>
+      <el-table
+        style="height: calc(100vh - 320px)"
+        v-loading="loading"
+        :data="userList"
+        border
+      >
         <el-table-column type="index" align="center" label="#" width="50" />
         <el-table-column
           prop="username"
@@ -35,7 +40,7 @@
         />
         <el-table-column prop="avatar" label="头像" align="center" width="100">
           <template v-slot="scope">
-            <el-avatar :src="scope.row.avatar" />
+            <el-avatar :size="50" :src="scope.row.avatar" />
           </template>
         </el-table-column>
         <el-table-column

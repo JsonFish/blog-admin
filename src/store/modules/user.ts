@@ -8,15 +8,14 @@ import { getLogin, refreshTokenApi } from "@/api/login";
 import { LoginResult, RefreshTokenResult } from "@/api/login";
 import { useMultiTagsStoreHook } from "@/store/modules/multiTags";
 import { type DataInfo, setToken, removeToken, sessionKey } from "@/utils/auth";
-import { message } from "@/utils/message";
 export const useUserStore = defineStore("user", {
   state: (): userType => ({
-    avatar: "",
+    avatar: localStorage.getItem("avatar"),
     // 用户名
-    username: "",
+    username: localStorage.getItem("username"),
     // storageSession().getItem<DataInfo<number>>(sessionKey)?.username ?? "",
     // 页面级别权限
-    role: storageSession().getItem<DataInfo<number>>(sessionKey)?.role ?? 0
+    role: storageSession().getItem<DataInfo>(sessionKey)?.role ?? 0
   }),
   actions: {
     /** 存储用户名 */
@@ -33,10 +32,7 @@ export const useUserStore = defineStore("user", {
         getLogin(data)
           .then(response => {
             if (response.code == 200) {
-              // this.SET_USERNAME(response.data.username);
-              this.username = response.data.username;
-              this.avatar = response.data.avatar;
-              // setToken(response.data);
+              setToken(response.data);
               resolve(response);
             } else {
               reject(response);
@@ -59,13 +55,6 @@ export const useUserStore = defineStore("user", {
     /** 刷新`token` */
     async handRefreshToken() {
       return new Promise<RefreshTokenResult>((resolve, reject) => {
-        const refreshToken = localStorage.getItem("refreshToken");
-        // 没有 refershToken 直接退出,重新登录
-        if (!refreshToken) {
-          message("身份认证失败，请重新登录", { type: "error" });
-          this.logOut();
-          return;
-        }
         refreshTokenApi()
           .then(response => {
             // 刷新成功

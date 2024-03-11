@@ -19,7 +19,7 @@
       <el-icon class="avatar-uploader-icon"><Plus /></el-icon>
       <template #file="{ file }">
         <div>
-          <el-image fit="cover" :src="file.url" lazy />
+          <el-image fit="cover" :src="file.url" />
           <span class="el-upload-list__item-actions">
             <span class="el-upload-list__item-preview" @click="perview(file)">
               <el-icon><zoom-in /></el-icon>
@@ -70,16 +70,6 @@ const props = defineProps({
   fileList: {
     type: Array<object>,
     default: () => {}
-  },
-  // 宽
-  width: {
-    type: Number,
-    default: 200
-  },
-  // 高
-  height: {
-    type: Number,
-    default: 200
   }
   // 文件类型, 例如'png', 'jpg', 'jpeg',字符串，英文逗号隔开
   // fileType: {

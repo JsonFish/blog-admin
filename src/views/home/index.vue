@@ -29,7 +29,7 @@ const uploadFun = async () => {
 </script>
 
 <template>
-  <el-card>
+  <el-card style="height: 100%">
     <template #header>
       <div>首页</div>
     </template>
