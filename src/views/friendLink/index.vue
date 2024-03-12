@@ -366,7 +366,8 @@ const friendLink = reactive<any>({
   id: "",
   name: "",
   url: "",
-  description: ""
+  description: "",
+  avatar: ""
 });
 const total = ref<number>(0);
 const loading = ref<boolean>(false);
