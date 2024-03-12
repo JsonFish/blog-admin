@@ -10,12 +10,7 @@ import { useRenderIcon } from "@/components/ReIcon/src/hooks";
 import { message } from "@/utils/message";
 import { ref, reactive, onMounted } from "vue";
 import { useRouter } from "vue-router";
-import {
-  getArticle,
-  getDraft,
-  deletArticle,
-  addOrUpdateArticle
-} from "@/api/article";
+import { getArticle, getDraft, deletArticle, addArticle } from "@/api/article";
 
 defineOptions({
   name: "ArticleManage"
@@ -74,7 +69,7 @@ const updateArticle = row => {
 // 修改文章状态
 const updateArticleStatus = row => {
   const status = row.status == 0 ? 1 : 0;
-  addOrUpdateArticle({ id: row.id, status: status }).then(response => {
+  addArticle({ id: row.id, status: status }).then(response => {
     if (response.code == 200) {
       message("操作成功", { type: "success" });
       getArticleLsit();
@@ -120,6 +115,7 @@ const deleteBtn = row => {
         <el-form :model="queryParams" :inline="true" ref="queryFormRef">
           <el-form-item label="搜索标题">
             <el-input
+              clearable
               v-model="queryParams.articleTitle"
               placeholder="请输入文章标题"
               prop="articleTitle"
@@ -222,7 +218,7 @@ const deleteBtn = row => {
               label="修改时间"
               min-width="160"
             />
-            <el-table-column label="操作" min-width="180">
+            <el-table-column label="操作" min-width="190">
               <template #default="scope">
                 <div class="btnClass">
                   <el-button
@@ -279,7 +275,7 @@ const deleteBtn = row => {
               align="center"
               prop="articleTitle"
               label="文章标题"
-              min-width="120"
+              min-width="100"
               show-overflow-tooltip
             />
             <el-table-column
@@ -287,7 +283,7 @@ const deleteBtn = row => {
               prop="articleSummary"
               label="摘要"
               show-overflow-tooltip
-              width="160"
+              width="140"
             />
 
             <el-table-column
@@ -311,7 +307,7 @@ const deleteBtn = row => {
               align="center"
               prop="tags"
               label="标签"
-              min-width="200"
+              min-width="210"
             >
               <template #default="scope">
                 <el-tag
@@ -339,6 +335,11 @@ const deleteBtn = row => {
                 }}
               </template>
             </el-table-column>
+            <el-table-column align="center" prop="isTop" label="置顶排序">
+              <template #default="scope">
+                {{ scope.row.isTop == 0 ? "未置顶" : scope.row.order }}
+              </template>
+            </el-table-column>
             <el-table-column
               align="center"
               prop="create_time"
@@ -351,7 +352,7 @@ const deleteBtn = row => {
               label="修改时间"
               min-width="160"
             />
-            <el-table-column label="操作" min-width="180">
+            <el-table-column label="操作" min-width="190">
               <template #default="scope">
                 <div class="btnClass">
                   <el-button
@@ -367,7 +368,7 @@ const deleteBtn = row => {
                     :title="`是否公开文章 ${scope.row.articleTitle} ?`"
                     :icon="useRenderIcon(View)"
                     @confirm="updateArticleStatus(scope.row)"
-                    icon-color="#10dc41"
+                    icon-color="#90c23a"
                   >
                     <template #reference>
                       <el-button

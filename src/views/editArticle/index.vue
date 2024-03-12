@@ -6,6 +6,7 @@
           <div>{{ articleForm.id ? "编辑文章" : "新增文章" }}</div>
           <el-row>
             <el-link
+              v-show="!articleForm.id"
               style="margin-right: 20px"
               :underline="false"
               :icon="useRenderIcon(Files)"
@@ -147,7 +148,7 @@
           >
             <Upload
               :limit="1"
-              :fileSize="5"
+              :fileSize="4"
               @getFileList="getFileList"
               v-model:fileList="coverList"
             />
@@ -265,7 +266,7 @@ import { useRoute } from "vue-router";
 import type { UploadUserFile, FormInstance } from "element-plus";
 import { MdEditor } from "md-editor-v3";
 import "md-editor-v3/lib/style.css";
-import { getArticle, addOrUpdateArticle, addDraft } from "@/api/article";
+import { getArticle, addArticle, addDraft, updateArticle } from "@/api/article";
 import { getCategoryList } from "@/api/category";
 import { getTagList } from "@/api/tag";
 import { uploadFiles } from "@/api/file";
@@ -300,15 +301,22 @@ const tagList = ref<any>();
 const coverList = ref<UploadUserFile[]>([]);
 
 onMounted(async () => {
+  if (route.query.id) {
+    await getArticle({ id: route.query.id }).then(response => {
+      delete response.data.articleInfo.create_time;
+      delete response.data.articleInfo.update_time;
+      delete response.data.articleInfo.categoryName;
+      delete response.data.articleInfo.tags;
+      delete response.data.articleInfo.browse;
+      delete response.data.articleInfo.upvote;
+      Object.assign(articleForm, response.data.articleInfo);
+    });
+  }
   await getCategoryList().then(response => {
     categoryList.value = response.data.categoryList;
   });
-  await getTagList().then(response => {
+  getTagList().then(response => {
     tagList.value = response.data.tagList;
-  });
-  if (!route.query.id) return;
-  await getArticle({ id: route.query.id }).then(response => {
-    Object.assign(articleForm, response.data.articleInfo);
   });
 });
 
@@ -367,26 +375,59 @@ const onUploadImg = async (files, callback) => {
 // 发布文章
 const publishArticle = async (formEl: FormInstance | undefined) => {
   if (!formEl) return;
-  if (coverList.value.length != 0) {
-    // 上传封面
-    const response = await uploadFile(coverList.value);
-    articleForm.articleCover = response.url;
+  // 没选择封面| 删除了封面
+  if (coverList.value.length == 0) {
+    articleForm.articleCover = "";
   }
+  if (
+    // 更换了封面
+    coverList.value.length != 0 &&
+    coverList.value[0].url != articleForm.articleCover
+  ) {
+    // 防止删除封面后校验 上传新的封面校验不通过
+    articleForm.articleCover = "test";
+  }
+
   await formEl.validate(async (valid, fields) => {
-    if (valid) {
+    if (
+      coverList.value.length != 0 &&
+      coverList.value[0].url != articleForm.articleCover &&
+      valid
+    ) {
       if (!articleForm.articleContent) {
         message("文章内容不能为空 !", { type: "warning" });
         return;
       }
-      addOrUpdateArticle(articleForm).then(response => {
-        if (response.code == 200) {
-          message("发布成功", { type: "success" });
-          articleForm.articleContent = "";
-        } else {
-          message(response.message, { type: "error" });
-        }
-        closeDrawer();
+      await uploadFile(coverList.value).then(response => {
+        articleForm.articleCover = response.url;
       });
+    }
+    if (valid) {
+      // 修改
+      if (articleForm.id) {
+        updateArticle(articleForm).then(response => {
+          if (response.code == 200) {
+            message("修改成功", { type: "success" });
+            articleForm.articleContent = "";
+            articleForm.id = "";
+          } else {
+            message(response.message, { type: "error" });
+          }
+          closeDrawer();
+        });
+      } else {
+        // 新增
+        delete articleForm.id;
+        addArticle(articleForm).then(response => {
+          if (response.code == 200) {
+            message("发布成功", { type: "success" });
+            articleForm.articleContent = "";
+          } else {
+            message(response.message, { type: "error" });
+          }
+          closeDrawer();
+        });
+      }
     } else {
       return fields;
     }

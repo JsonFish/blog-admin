@@ -8,6 +8,7 @@
         <el-form :model="queryParams" :inline="true" ref="queryFormRef">
           <el-form-item label="用户名">
             <el-input
+              clearable
               v-model="queryParams.username"
               placeholder="请输入用户名"
               prop="tagName"
@@ -309,7 +310,6 @@ const submit = async (formEl: FormInstance | undefined) => {
         userForm.avatar = response.url;
       });
     }
-
     if (valid) {
       // 更新数据
       delete userForm.status;
