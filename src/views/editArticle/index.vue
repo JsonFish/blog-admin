@@ -3,7 +3,7 @@
     <el-card>
       <template #header>
         <div class="header">
-          <div>新增文章</div>
+          <div>{{ articleForm.id ? "编辑文章" : "新增文章" }}</div>
           <el-row>
             <el-link
               style="margin-right: 20px"
@@ -209,7 +209,7 @@
           <div style="border-top: 1px solid gray; padding-top: 10px">
             <el-button @click="closeDrawer">取消</el-button>
             <el-button type="primary" @click="publishArticle(articleFormRef)"
-              >发布</el-button
+              >确定</el-button
             >
           </div>
         </template>
@@ -260,11 +260,12 @@ import Check from "@iconify-icons/ep/check";
 import Close from "@/assets/svg/close.svg?component";
 import { useRenderIcon } from "@/components/ReIcon/src/hooks";
 import Upload from "@/components/ReUpload/index.vue";
-import { reactive, ref } from "vue";
+import { reactive, ref, onMounted } from "vue";
+import { useRoute } from "vue-router";
 import type { UploadUserFile, FormInstance } from "element-plus";
 import { MdEditor } from "md-editor-v3";
 import "md-editor-v3/lib/style.css";
-import { addOrUpdateArticle } from "@/api/article";
+import { getArticle, addOrUpdateArticle, addDraft } from "@/api/article";
 import { getCategoryList } from "@/api/category";
 import { getTagList } from "@/api/tag";
 import { uploadFiles } from "@/api/file";
@@ -273,6 +274,7 @@ import { uploadFile } from "@/utils/upload";
 defineOptions({
   name: "AddArticle"
 });
+const route = useRoute();
 const dialogVisible = ref<boolean>(false);
 const articleFormRef = ref<FormInstance>();
 
@@ -284,10 +286,10 @@ const articleForm = reactive({
   articleSummary: "", // 摘要
   articleContent: "", // 文章内容
   articleCover: "", // 封面url
-  categoryId: null, // 分类
+  categoryId: "", // 分类
   tagIds: [], // 标签
   isTop: 0, // 0 不置顶 1 置顶
-  order: 1, // 置顶文章的排序
+  order: 0, // 置顶文章的排序
   status: 0, // 状态 0 公开 1下架(私密) 2 草稿 3 删除
   type: 0, // 类型 0 原创 1 转载 2 翻译
   author: "", // 原文作者
@@ -297,15 +299,28 @@ const categoryList = ref<any>();
 const tagList = ref<any>();
 const coverList = ref<UploadUserFile[]>([]);
 
-// 打开Drawer回调函数
-const openDrawer = async () => {
-  drawerVisible.value = true;
+onMounted(async () => {
   await getCategoryList().then(response => {
     categoryList.value = response.data.categoryList;
   });
-  getTagList().then(response => {
+  await getTagList().then(response => {
     tagList.value = response.data.tagList;
   });
+  if (!route.query.id) return;
+  await getArticle({ id: route.query.id }).then(response => {
+    Object.assign(articleForm, response.data.articleInfo);
+  });
+});
+
+// 打开Drawer回调函数
+const openDrawer = async () => {
+  drawerVisible.value = true;
+  if (articleForm.id) {
+    coverList.value[0] = {
+      name: articleForm.articleTitle,
+      url: articleForm.articleCover
+    };
+  }
 };
 
 const openDialog = () => {
@@ -321,6 +336,7 @@ const closeDialog = () => {
 const closeDrawer = () => {
   drawerVisible.value = false;
   articleFormRef.value.resetFields();
+  coverList.value = [];
 };
 
 // Upload组件 上传成功回调
@@ -386,8 +402,7 @@ const savaDraft = (formEl: FormInstance | undefined) => {
         message("文章内容不能为空 !", { type: "warning" });
         return;
       }
-      articleForm.status = 2;
-      addOrUpdateArticle(articleForm).then(response => {
+      addDraft(articleForm).then(response => {
         if (response.code == 200) {
           message("保存成功", { type: "success" });
           articleForm.articleContent = "";
@@ -402,6 +417,7 @@ const savaDraft = (formEl: FormInstance | undefined) => {
   });
 };
 </script>
+
 <style lang="css" scoped>
 .header {
   display: flex;

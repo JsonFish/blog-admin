@@ -94,7 +94,7 @@
             <el-table-column
               prop="update_time"
               align="center"
-              label="修改时间"
+              label="更新时间"
               width="180"
             />
             <el-table-column label="操作" min-width="100">
@@ -139,18 +139,8 @@
           >
             <el-table-column type="selection" width="50" align="center" />
             <el-table-column type="index" align="center" label="#" width="50" />
-            <el-table-column
-              prop="name"
-              align="center"
-              label="网站名称"
-              width="200"
-            />
-            <el-table-column
-              prop="avatar"
-              label="头像"
-              align="center"
-              width="100"
-            >
+            <el-table-column prop="name" align="center" label="网站名称" />
+            <el-table-column prop="avatar" label="头像" align="center">
               <template v-slot="scope">
                 <el-avatar :src="scope.row.avatar" />
               </template>
@@ -159,25 +149,12 @@
               prop="description"
               align="center"
               label="网站描述"
-              width="150"
             />
-            <el-table-column
-              prop="url"
-              align="center"
-              label="网址"
-              width="200"
-            />
+            <el-table-column prop="url" align="center" label="网址" />
             <el-table-column
               prop="create_time"
               align="center"
               label="申请时间"
-              width="180"
-            />
-            <el-table-column
-              prop="update_time"
-              align="center"
-              label="修改时间"
-              width="180"
             />
             <el-table-column label="操作" min-width="100">
               <template #default="scope">
@@ -400,7 +377,7 @@ const reset = () => {
 // 切换tabs
 const tabClick = (tabPane: any) => {
   queryParams.status = tabPane.props.name;
-  // friendLinkList.value = [];
+  friendLinkList.value = [];
   getFriendLinkList();
 };
 // dialog取消按钮回调
