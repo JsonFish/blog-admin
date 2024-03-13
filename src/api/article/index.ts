@@ -25,3 +25,11 @@ export const getDraft = (params: object) => {
 export const addDraft = (data: object) => {
   return http.request<BaseResponse<any>>("post", "/article/draft", { data });
 };
+// 修改草稿
+export const updateDraft = (data: object) => {
+  return http.request<BaseResponse<any>>("put", "/article/draft", { data });
+};
+// 删除草稿
+export const deleteDraft = (data: object) => {
+  return http.request<BaseResponse<any>>("delete", "/article/draft", { data });
+};

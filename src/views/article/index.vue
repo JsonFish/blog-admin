@@ -10,7 +10,13 @@ import { useRenderIcon } from "@/components/ReIcon/src/hooks";
 import { message } from "@/utils/message";
 import { ref, reactive, onMounted } from "vue";
 import { useRouter } from "vue-router";
-import { getArticle, getDraft, deletArticle, addArticle } from "@/api/article";
+import {
+  getArticle,
+  getDraft,
+  deletArticle,
+  addArticle,
+  deleteDraft
+} from "@/api/article";
 
 defineOptions({
   name: "ArticleManage"
@@ -62,9 +68,16 @@ const tabClick = (tabPane: any) => {
   }
   getArticleLsit();
 };
-// 修改文章
+// 编辑文章
 const updateArticle = row => {
   router.push({ path: "/article/add", query: { id: row.id } });
+};
+// 编辑草稿
+const edidDraft = row => {
+  router.push({
+    path: "/article/add",
+    query: { id: row.id, status: row.status }
+  });
 };
 // 修改文章状态
 const updateArticleStatus = row => {
@@ -81,6 +94,22 @@ const updateArticleStatus = row => {
 // 删除文章
 const deleteBtn = row => {
   deletArticle({ id: row.id }).then(response => {
+    if (response.code == 200) {
+      message("删除成功", { type: "success" });
+      if (queryParams.status == 2) {
+        getDraftList();
+        console.log(2);
+      } else {
+        getArticleLsit();
+      }
+    } else {
+      message(response.message, { type: "error" });
+    }
+  });
+};
+// 删除草稿
+const deleteDraftBtn = row => {
+  deleteDraft({ id: row.id }).then(response => {
     if (response.code == 200) {
       message("删除成功", { type: "success" });
       if (queryParams.status == 2) {
@@ -439,13 +468,14 @@ const deleteBtn = row => {
                     link
                     type="primary"
                     :icon="useRenderIcon(EditPen)"
+                    @click="edidDraft(scope.row)"
                     >编辑</el-button
                   >
                   <el-popconfirm
                     width="220"
                     :title="`是否删除草稿 ${scope.row.articleTitle} ?`"
                     :icon="useRenderIcon(Warning)"
-                    @confirm="deleteBtn(scope.row)"
+                    @confirm="deleteDraftBtn(scope.row)"
                     icon-color="#f56c6c"
                   >
                     <template #reference>

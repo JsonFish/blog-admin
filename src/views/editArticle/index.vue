@@ -6,7 +6,7 @@
           <div>{{ articleForm.id ? "编辑文章" : "新增文章" }}</div>
           <el-row>
             <el-link
-              v-show="!articleForm.id"
+              v-if="!articleForm.id || articleForm.status == 2"
               style="margin-right: 20px"
               :underline="false"
               :icon="useRenderIcon(Files)"
@@ -44,7 +44,7 @@
               padding-bottom: 10px;
             "
           >
-            <span :id="titleId" :class="titleClass">发布文章</span>
+            <span :id="titleId" :class="titleClass"> 发布 </span>
             <el-button
               size="large"
               link
@@ -262,11 +262,18 @@ import Close from "@/assets/svg/close.svg?component";
 import { useRenderIcon } from "@/components/ReIcon/src/hooks";
 import Upload from "@/components/ReUpload/index.vue";
 import { reactive, ref, onMounted } from "vue";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import type { UploadUserFile, FormInstance } from "element-plus";
 import { MdEditor } from "md-editor-v3";
 import "md-editor-v3/lib/style.css";
-import { getArticle, addArticle, addDraft, updateArticle } from "@/api/article";
+import {
+  getArticle,
+  addArticle,
+  getDraft,
+  addDraft,
+  updateArticle,
+  updateDraft
+} from "@/api/article";
 import { getCategoryList } from "@/api/category";
 import { getTagList } from "@/api/tag";
 import { uploadFiles } from "@/api/file";
@@ -276,6 +283,7 @@ defineOptions({
   name: "AddArticle"
 });
 const route = useRoute();
+const router = useRouter();
 const dialogVisible = ref<boolean>(false);
 const articleFormRef = ref<FormInstance>();
 
@@ -301,34 +309,45 @@ const tagList = ref<any>();
 const coverList = ref<UploadUserFile[]>([]);
 
 onMounted(async () => {
-  if (route.query.id) {
+  // 文章
+  if (route.query.id && !route.query.status) {
     await getArticle({ id: route.query.id }).then(response => {
-      delete response.data.articleInfo.create_time;
-      delete response.data.articleInfo.update_time;
-      delete response.data.articleInfo.categoryName;
-      delete response.data.articleInfo.tags;
-      delete response.data.articleInfo.browse;
-      delete response.data.articleInfo.upvote;
-      Object.assign(articleForm, response.data.articleInfo);
+      delete response.data.articleList[0].create_time;
+      delete response.data.articleList[0].update_time;
+      delete response.data.articleList[0].categoryName;
+      delete response.data.articleList[0].tags;
+      delete response.data.articleList[0].browse;
+      delete response.data.articleList[0].upvote;
+      Object.assign(articleForm, response.data.articleList[0]);
     });
   }
-  await getCategoryList().then(response => {
-    categoryList.value = response.data.categoryList;
-  });
-  getTagList().then(response => {
-    tagList.value = response.data.tagList;
-  });
+  // 草稿
+  if (route.query.id && route.query.status) {
+    // 获取草稿详情
+    getDraft({ id: route.query.id }).then(response => {
+      articleForm.id = response.data.articleList[0].id;
+      articleForm.articleTitle = response.data.articleList[0].articleTitle;
+      articleForm.articleContent = response.data.articleList[0].articleContent;
+      articleForm.status = response.data.articleList[0].status;
+    });
+  }
 });
 
 // 打开Drawer回调函数
 const openDrawer = async () => {
-  drawerVisible.value = true;
-  if (articleForm.id) {
+  if (articleForm.articleCover) {
     coverList.value[0] = {
       name: articleForm.articleTitle,
       url: articleForm.articleCover
     };
   }
+  await getCategoryList().then(response => {
+    categoryList.value = response.data.categoryList;
+  });
+  await getTagList().then(response => {
+    tagList.value = response.data.tagList;
+  });
+  drawerVisible.value = true;
 };
 
 const openDialog = () => {
@@ -336,8 +355,8 @@ const openDialog = () => {
 };
 
 const closeDialog = () => {
-  dialogVisible.value = false;
   dialogFormRef.value.resetFields();
+  dialogVisible.value = false;
 };
 
 // 关闭Drawer
@@ -410,6 +429,7 @@ const publishArticle = async (formEl: FormInstance | undefined) => {
             message("修改成功", { type: "success" });
             articleForm.articleContent = "";
             articleForm.id = "";
+            router.push("/article/manage");
           } else {
             message(response.message, { type: "error" });
           }
@@ -418,10 +438,12 @@ const publishArticle = async (formEl: FormInstance | undefined) => {
       } else {
         // 新增
         delete articleForm.id;
+        articleForm.status = 0;
         addArticle(articleForm).then(response => {
           if (response.code == 200) {
             message("发布成功", { type: "success" });
             articleForm.articleContent = "";
+            router.push("/article/manage");
           } else {
             message(response.message, { type: "error" });
           }
@@ -443,15 +465,27 @@ const savaDraft = (formEl: FormInstance | undefined) => {
         message("文章内容不能为空 !", { type: "warning" });
         return;
       }
-      addDraft(articleForm).then(response => {
-        if (response.code == 200) {
-          message("保存成功", { type: "success" });
-          articleForm.articleContent = "";
-        } else {
-          message(response.message, { type: "error" });
-        }
-        closeDialog();
-      });
+      if (articleForm.id) {
+        updateDraft(articleForm).then(response => {
+          if (response.code == 200) {
+            message("修改成功", { type: "success" });
+            closeDialog();
+            router.push("/article/manage");
+          } else {
+            message(response.message, { type: "error" });
+          }
+        });
+      } else {
+        addDraft(articleForm).then(response => {
+          if (response.code == 200) {
+            message("保存成功", { type: "success" });
+            articleForm.articleContent = "";
+            closeDialog();
+          } else {
+            message(response.message, { type: "error" });
+          }
+        });
+      }
     } else {
       return fields;
     }
