@@ -27,6 +27,7 @@
         >
       </el-row>
       <el-table
+        size="small"
         style="height: calc(100vh - 320px)"
         v-loading="loading"
         :data="userList"
@@ -331,7 +332,7 @@ const submit = async (formEl: FormInstance | undefined) => {
 const changeStatus = row => {
   userForm.id = row.id;
   userForm.status = row.status;
-  changeUserStatus(userForm).then(response => {
+  changeUserStatus({ id: row.id }).then(response => {
     if (response.code == 200) {
       message("操作成功", { type: "success" });
     } else {

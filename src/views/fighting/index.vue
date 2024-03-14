@@ -18,11 +18,11 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { reactive } from "vue";
 import { MdPreview, MdCatalog } from "md-editor-v3";
 const state = reactive({
-  theme: "light",
+  theme: "dark",
   text: "标题",
   id: "my-editor"
 });

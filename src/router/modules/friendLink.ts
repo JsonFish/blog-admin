@@ -10,11 +10,11 @@ export default {
   children: [
     {
       path: "/friendLink",
-      name: "friendLink",
-      component: () => import("@/views/friendlink/index.vue"),
+      name: "FriendLink",
+      component: () => import("@/views/friendLink/index.vue"),
       meta: {
         title: "友链管理"
       }
     }
   ]
-};
+} as RouteConfigsTable;

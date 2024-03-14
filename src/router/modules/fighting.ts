@@ -2,25 +2,16 @@
 export default {
   path: "/fighting",
   meta: {
-    title: "励志",
-    rank: 999
+    rank: 9
   },
 
   children: [
     {
-      path: "/fighting/index",
+      path: "/fighting",
       name: "Fighting",
       component: () => import("@/views/fighting/index.vue"),
       meta: {
         title: "加油"
-      }
-    },
-    {
-      path: "/fighting/effort",
-      name: "Effort",
-      component: () => import("@/views/fighting/effort.vue"),
-      meta: {
-        title: "努力"
       }
     }
   ]

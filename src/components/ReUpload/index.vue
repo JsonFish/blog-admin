@@ -24,7 +24,11 @@
             <span class="el-upload-list__item-preview" @click="perview(file)">
               <el-icon><zoom-in /></el-icon>
             </span>
-            <span class="el-upload-list__item-delete" @click="remove(file)">
+            <span
+              v-show="!hiddenDelete"
+              class="el-upload-list__item-delete"
+              @click="remove(file)"
+            >
               <el-icon><Delete /></el-icon>
             </span>
           </span>
@@ -70,6 +74,11 @@ const props = defineProps({
   fileList: {
     type: Array<object>,
     default: () => {}
+  },
+  // 隐藏删除按钮
+  hiddenDelete: {
+    type: Boolean,
+    dafault: false
   }
   // 文件类型, 例如'png', 'jpg', 'jpeg',字符串，英文逗号隔开
   // fileType: {

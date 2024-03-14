@@ -39,6 +39,7 @@
         >
       </el-row>
       <el-table
+        size="small"
         stripe
         v-loading="loading"
         :data="categoryList"

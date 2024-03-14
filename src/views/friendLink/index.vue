@@ -5,7 +5,12 @@
         <div>友链管理</div>
       </template>
       <el-row>
-        <el-form :model="queryParams" :inline="true" ref="queryFormRef">
+        <el-form
+          size="small"
+          :model="queryParams"
+          :inline="true"
+          ref="queryFormRef"
+        >
           <el-form-item label="网站名称">
             <el-input
               v-model="queryParams.siteName"
@@ -48,6 +53,7 @@
       <el-tabs :model-value="1" @tab-click="tabClick">
         <el-tab-pane label="审核通过" :name="1">
           <el-table
+            size="small"
             stripe
             v-loading="loading"
             :data="friendLinkList"
@@ -130,6 +136,7 @@
         >
         <el-tab-pane label="待审核" :name="0">
           <el-table
+            size="small"
             stripe
             v-loading="loading"
             :data="friendLinkList"
@@ -249,9 +256,7 @@
           :rules="[
             {
               required: true,
-              min: 2,
-              max: 10,
-              message: '名称长度2-10位 !',
+              message: '网站名称不能为空 !',
               trigger: 'blur'
             }
           ]"
@@ -268,9 +273,7 @@
           :rules="[
             {
               required: true,
-              min: 2,
-              max: 10,
-              message: '名称长度2-10位 !',
+              message: '网站描述不能为空 !',
               trigger: 'blur'
             }
           ]"

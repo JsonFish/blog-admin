@@ -6,26 +6,28 @@ import Search from "@iconify-icons/ep/search";
 import Refresh from "@iconify-icons/ep/refresh";
 import Hide from "@iconify-icons/ep/hide";
 import View from "@iconify-icons/ep/view";
+import type { TabsPaneContext } from "element-plus";
 import { useRenderIcon } from "@/components/ReIcon/src/hooks";
 import { message } from "@/utils/message";
 import { ref, reactive, onMounted } from "vue";
 import { useRouter } from "vue-router";
+import type { QueryParams } from "@/api/article/type";
 import {
   getArticle,
   getDraft,
   deletArticle,
-  addArticle,
-  deleteDraft
+  deleteDraft,
+  updateStatus
 } from "@/api/article";
 
 defineOptions({
   name: "ArticleManage"
 });
 // 查询参数
-const queryParams = reactive({
+const queryParams = reactive<QueryParams>({
   articleTitle: "",
   currentPage: 1,
-  pageSize: 5,
+  pageSize: 10,
   status: 0
 });
 const router = useRouter();
@@ -36,31 +38,33 @@ const loading = ref<boolean>(false);
 onMounted(() => {
   getArticleLsit();
 });
-// 获取文章
+// 获取文章列表
 const getArticleLsit = () => {
   loading.value = true;
-  getArticle(queryParams).then((response: any) => {
+  getArticle(queryParams).then(response => {
     articleList.value = response.data.articleList;
     total.value = response.data.total;
     loading.value = false;
   });
 };
-// 获取草稿
+// 获取草稿列表
 const getDraftList = () => {
   loading.value = true;
-  getDraft(queryParams).then((response: any) => {
+  getDraft(queryParams).then(response => {
     articleList.value = response.data.articleList;
     total.value = response.data.total;
     loading.value = false;
   });
 };
+// 重置按钮
 const reset = () => {
   queryParams.articleTitle = "";
   getArticleLsit();
 };
+
 // 切换tabs
-const tabClick = (tabPane: any) => {
-  queryParams.status = tabPane.props.name;
+const tabClick = (tabPane: TabsPaneContext) => {
+  queryParams.status = tabPane.props.name as number;
   articleList.value = [];
   if (queryParams.status == 2) {
     getDraftList();
@@ -68,10 +72,12 @@ const tabClick = (tabPane: any) => {
   }
   getArticleLsit();
 };
+
 // 编辑文章
 const updateArticle = row => {
   router.push({ path: "/article/add", query: { id: row.id } });
 };
+
 // 编辑草稿
 const edidDraft = row => {
   router.push({
@@ -79,10 +85,10 @@ const edidDraft = row => {
     query: { id: row.id, status: row.status }
   });
 };
-// 修改文章状态
+
+// 显示隐藏文章
 const updateArticleStatus = row => {
-  const status = row.status == 0 ? 1 : 0;
-  addArticle({ id: row.id, status: status }).then(response => {
+  updateStatus({ id: row.id }).then(response => {
     if (response.code == 200) {
       message("操作成功", { type: "success" });
       getArticleLsit();
@@ -91,6 +97,7 @@ const updateArticleStatus = row => {
     }
   });
 };
+
 // 删除文章
 const deleteBtn = row => {
   deletArticle({ id: row.id }).then(response => {
@@ -98,7 +105,6 @@ const deleteBtn = row => {
       message("删除成功", { type: "success" });
       if (queryParams.status == 2) {
         getDraftList();
-        console.log(2);
       } else {
         getArticleLsit();
       }
@@ -107,6 +113,7 @@ const deleteBtn = row => {
     }
   });
 };
+
 // 删除草稿
 const deleteDraftBtn = row => {
   deleteDraft({ id: row.id }).then(response => {
@@ -114,7 +121,6 @@ const deleteDraftBtn = row => {
       message("删除成功", { type: "success" });
       if (queryParams.status == 2) {
         getDraftList();
-        console.log(2);
       } else {
         getArticleLsit();
       }
@@ -164,7 +170,13 @@ const deleteDraftBtn = row => {
       </el-row>
       <el-tabs :model-value="0" @tab-click="tabClick">
         <el-tab-pane label="已发布" :name="0">
-          <el-table stripe border :data="articleList" v-loading="loading">
+          <el-table
+            size="small"
+            stripe
+            border
+            :data="articleList"
+            v-loading="loading"
+          >
             <el-table-column type="index" align="center" label="#" width="40" />
             <el-table-column
               align="center"
@@ -298,7 +310,13 @@ const deleteDraftBtn = row => {
           </el-table>
         </el-tab-pane>
         <el-tab-pane label="已隐藏" :name="1">
-          <el-table stripe border :data="articleList" v-loading="loading">
+          <el-table
+            size="small"
+            stripe
+            border
+            :data="articleList"
+            v-loading="loading"
+          >
             <el-table-column type="index" align="center" label="#" width="40" />
             <el-table-column
               align="center"
@@ -432,7 +450,13 @@ const deleteDraftBtn = row => {
           </el-table>
         </el-tab-pane>
         <el-tab-pane label="草稿箱" :name="2">
-          <el-table stripe border :data="articleList" v-loading="loading">
+          <el-table
+            size="small"
+            stripe
+            border
+            :data="articleList"
+            v-loading="loading"
+          >
             <el-table-column type="index" align="center" label="#" width="35" />
             <el-table-column
               align="center"
