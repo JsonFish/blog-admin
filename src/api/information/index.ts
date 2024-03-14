@@ -6,5 +6,5 @@ export const getInfo = () => {
 };
 // 更新前台信息
 export const updateInfo = (data: Information) => {
-  return http.request<BaseResponse<any>>("post", "/config", { data });
+  return http.request<BaseResponse<any>>("put", "/config", { data });
 };

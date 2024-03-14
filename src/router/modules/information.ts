@@ -10,7 +10,7 @@ export default {
     {
       path: "/information",
       name: "Information",
-      component: () => import("@/views/foreground/information/index.vue"),
+      component: () => import("@/views/foreground/index.vue"),
       meta: {
         title: "前台管理"
       }
