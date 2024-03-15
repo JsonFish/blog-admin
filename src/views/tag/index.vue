@@ -66,7 +66,7 @@
           label="更新时间"
           width="300"
         />
-        <el-table-column prop="address" label="操作">
+        <el-table-column prop="address" label="操作" min-width="300">
           <template #default="scope">
             <div class="btnClass">
               <el-button

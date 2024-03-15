@@ -1,11 +1,18 @@
 <script setup lang="ts">
 import { ref } from "vue";
-import Upload from "@/components/ReUpload/test.vue";
+import Upload from "@/components/ReUpload/index.vue";
 import { uploadFiles } from "@/api/file";
 defineOptions({
   name: "Home"
 });
-const fileList = ref([]);
+const fileList = ref([
+  {
+    url: "http://sa6qp7vwh.hb-bkt.clouddn.com/1710462107201.png"
+  },
+  {
+    url: "http://sa6qp7vwh.hb-bkt.clouddn.com/1710462107180.png"
+  }
+]);
 const uploadRef = ref();
 const files = ref([]);
 const getFileList = async fileList => {
@@ -36,11 +43,10 @@ const uploadFun = async () => {
     <Upload
       ref="uploadRef"
       v-model:fileList="fileList"
-      :limit="5"
+      :limit="4"
       multiple
-      :autoUpload="true"
       @getFileList="getFileList"
     />
-    <el-button @click="uploadFun" />
+    <el-button @click="uploadFun">上传</el-button>
   </el-card>
 </template>

@@ -146,9 +146,14 @@ const deleteDraftBtn = row => {
           >
         </div>
       </template>
-      <el-row class="top">
-        <el-form :model="queryParams" :inline="true" ref="queryFormRef">
-          <el-form-item label="搜索标题">
+      <el-row>
+        <el-form
+          size="small"
+          :model="queryParams"
+          :inline="true"
+          ref="queryFormRef"
+        >
+          <el-form-item label="标题">
             <el-input
               clearable
               v-model="queryParams.articleTitle"
@@ -158,13 +163,18 @@ const deleteDraftBtn = row => {
           </el-form-item>
         </el-form>
         <el-button
+          size="small"
           :disabled="!queryParams.articleTitle"
           type="primary"
           :icon="useRenderIcon(Search)"
           @click="getArticleLsit"
           >搜索</el-button
         >
-        <el-button type="info" :icon="useRenderIcon(Refresh)" @click="reset"
+        <el-button
+          size="small"
+          type="info"
+          :icon="useRenderIcon(Refresh)"
+          @click="reset"
           >重置</el-button
         >
       </el-row>
@@ -544,9 +554,5 @@ const deleteDraftBtn = row => {
 
 .text {
   font-size: 14px;
-}
-.top {
-  margin-top: -13px;
-  height: 35px;
 }
 </style>
