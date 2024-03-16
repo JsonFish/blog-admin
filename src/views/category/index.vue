@@ -346,7 +346,7 @@ const submit = async (formEl: FormInstance | undefined) => {
 };
 // checkBox处理
 const handleSelectionChange = (categoryList: CategoryInfo[]) => {
-  idList.value = categoryList.map((categoryInfo: CategoryInfo) => {
+  idList.value = categoryList.map(categoryInfo => {
     return categoryInfo.id;
   });
 };
@@ -364,7 +364,6 @@ const deleteBtn = async (row: CategoryInfo | any) => {
       message(response.message, { type: "error" });
     }
   });
-  categoryForm.id = ""; // 重置id
   idList.value = [];
 };
 </script>

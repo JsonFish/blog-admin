@@ -1,13 +1,14 @@
 import { http } from "@/utils/http";
-enum API {
-  Dynamic = "/daily"
+import { DynamicData, DynamicInfo } from "./type";
+enum Path {
+  Dynamic = "/dynamic"
 }
 export const getDynamic = () => {
-  return http.request<BasicResponse>("get", API.Dynamic);
+  return http.request<BasicResponse<DynamicData>>("get", Path.Dynamic);
 };
-export const addDynamic = (data: any) => {
-  return http.request<BasicResponse>("post", API.Dynamic, { data });
+export const addDynamic = (data: DynamicInfo) => {
+  return http.request<BasicResponse>("post", Path.Dynamic, { data });
 };
-export const deleteDynamic = (data: any) => {
-  return http.request<BasicResponse>("delete", API.Dynamic, { data });
+export const deleteDynamic = (data: { id: number }) => {
+  return http.request<BasicResponse>("delete", Path.Dynamic, { data });
 };

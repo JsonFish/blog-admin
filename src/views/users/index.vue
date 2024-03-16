@@ -216,42 +216,39 @@
 
 <script setup lang="ts">
 import Search from "@iconify-icons/ep/search";
-// import Plus from "@iconify-icons/ep/plus";
 import Refresh from "@iconify-icons/ep/refresh";
-// import Delete from "@iconify-icons/ep/delete";
 import EditPen from "@iconify-icons/ep/edit-pen";
-// import Warning from "@iconify-icons/ep/warning";
 import { useRenderIcon } from "@/components/ReIcon/src/hooks";
 import Upload from "@/components/ReUpload/index.vue";
 import { getUserList, updateUser, changeUserStatus } from "@/api/user";
+import type { QueryParams, UserInfo } from "@/api/user/type";
 import { uploadFile } from "@/utils/upload";
 import { ref, reactive, onMounted, nextTick } from "vue";
 import { message } from "@/utils/message";
 import type { FormInstance, UploadUserFile } from "element-plus";
 defineOptions({
-  // name 作为一种规范最好必须写上并且和路由的name保持一致
   name: "Users"
 });
-// dialog
+
 const dialogVisible = ref<boolean>(false);
 // 查询参数
-const queryParams = reactive<any>({
+const queryParams = reactive<QueryParams>({
   username: "",
   currentPage: 1,
   pageSize: 10
 });
 // 表单参数
-const userForm = reactive<any>({
-  id: "",
+const userForm = reactive<UserInfo>({
+  id: null,
   email: "",
   username: "",
-  role: "",
-  status: ""
+  role: null,
+  status: null
 });
 const userFormRef = ref<FormInstance>();
 const loading = ref<boolean>(false);
 const total = ref<number>(0);
-const userList = ref([]);
+const userList = ref<UserInfo[]>([]);
 const avatarList = ref<UploadUserFile[]>([]);
 onMounted(() => {
   getUsers();
@@ -267,11 +264,11 @@ const getUsers = () => {
 };
 // 重置按钮回调
 const reset = () => {
-  queryParams.username = "";
+  queryParams.username = null;
   getUsers();
 };
 // 修改按钮回调
-const updateBtn = row => {
+const updateBtn = (row: UserInfo) => {
   dialogVisible.value = true;
   // dialog + form resetFields() 无法重置问题
   nextTick(() => {
@@ -292,7 +289,7 @@ const cancel = () => {
   userFormRef.value.resetFields();
   avatarList.value = [];
 };
-const getFileList = fileList => {
+const getFileList = (fileList: UploadUserFile[]) => {
   avatarList.value = fileList;
 };
 // 修改提交按钮
@@ -328,11 +325,11 @@ const submit = async (formEl: FormInstance | undefined) => {
       updateUser(userForm).then(response => {
         if (response.code == 200) {
           message("修改成功", { type: "success" });
-          cancel();
           getUsers();
         } else {
           message("修改失败", { type: "error" });
         }
+        cancel();
       });
     } else {
       return fields;
@@ -340,9 +337,7 @@ const submit = async (formEl: FormInstance | undefined) => {
   });
 };
 // 拉黑/拉出用户
-const changeStatus = row => {
-  userForm.id = row.id;
-  userForm.status = row.status;
+const changeStatus = (row: UserInfo) => {
   changeUserStatus({ id: row.id }).then(response => {
     if (response.code == 200) {
       message("操作成功", { type: "success" });

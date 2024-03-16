@@ -1,3 +1,210 @@
+<script setup lang="ts">
+import Search from "@iconify-icons/ep/search";
+import Plus from "@iconify-icons/ep/plus";
+import Refresh from "@iconify-icons/ep/refresh";
+import Delete from "@iconify-icons/ep/delete";
+import EditPen from "@iconify-icons/ep/edit-pen";
+import Warning from "@iconify-icons/ep/warning";
+import Check from "@iconify-icons/ep/check";
+import Close from "@iconify-icons/ep/close";
+import { useRenderIcon } from "@/components/ReIcon/src/hooks";
+import Upload from "@/components/ReUpload/index.vue";
+import { onMounted, ref, reactive, nextTick } from "vue";
+import {
+  getFriendLink,
+  addFriendLink,
+  updateFriendLink,
+  deleteFriendLink,
+  agreeLink
+} from "@/api/link";
+import type { QueryParmars, LinkInfo } from "@/api/link/type";
+import { uploadFile } from "@/utils/upload";
+import { message } from "@/utils/message";
+import type {
+  FormInstance,
+  UploadUserFile,
+  TabsPaneContext
+} from "element-plus";
+defineOptions({
+  name: "FriendLink"
+});
+
+const queryParams = reactive<QueryParmars>({
+  siteName: "",
+  currentPage: 1,
+  pageSize: 10,
+  status: 1
+});
+const queryFormRef = ref<FormInstance>();
+const friendLinkFormRef = ref<FormInstance>();
+
+const friendLinkImageList = ref<UploadUserFile[]>([]);
+const friendLink = reactive<LinkInfo>({
+  id: null,
+  siteName: "",
+  siteUrl: "",
+  siteDesc: "",
+  siteAvatar: ""
+});
+const total = ref<number>(0);
+const loading = ref<boolean>(false);
+const dialogVisible = ref<boolean>(false);
+
+const friendLinkList = ref<LinkInfo[]>();
+
+// 存储批量删除分类id
+const idList = ref<Array<number>>([]);
+
+onMounted(() => {
+  getFriendLinkList();
+});
+
+// 获取友链数据
+const getFriendLinkList = () => {
+  loading.value = true;
+  getFriendLink(queryParams).then(response => {
+    friendLinkList.value = response.data.linkList;
+    total.value = response.data.total;
+    loading.value = false;
+  });
+};
+// 重置按钮回调
+const reset = () => {
+  // queryFormRef.value.resetFields(); // 无法重置
+  queryParams.siteName = "";
+  getFriendLinkList();
+};
+// 切换tabs
+const tabClick = (tabPane: TabsPaneContext) => {
+  queryParams.status = tabPane.props.name as number;
+  friendLinkList.value = [];
+  getFriendLinkList();
+};
+// dialog取消按钮回调
+const cancel = () => {
+  dialogVisible.value = false;
+  friendLinkFormRef.value.resetFields();
+  friendLink.id = null; // id不能重置
+  friendLinkImageList.value = [];
+};
+// 修改按钮回调
+const updateBtn = (row: LinkInfo) => {
+  dialogVisible.value = true;
+  // dialog + form resetFields() 无法重置问题
+  nextTick(() => {
+    friendLink.id = row.id;
+    friendLink.siteName = row.siteName;
+    friendLink.siteUrl = row.siteUrl;
+    friendLink.siteDesc = row.siteDesc;
+    friendLink.siteAvatar = row.siteAvatar;
+    friendLinkImageList.value[0] = {
+      url: row.siteAvatar,
+      name: row.siteName
+    };
+  });
+};
+// 同意友链申请
+const agreeApply = (row: LinkInfo) => {
+  agreeLink({ id: row.id }).then(response => {
+    if (response.code == 200) {
+      message("操作成功", { type: "success" });
+      getFriendLinkList();
+    } else {
+      message(response.message, { type: "error" });
+    }
+  });
+};
+// 获取要上传的文件
+const getFileList = (fileList: UploadUserFile[]) => {
+  friendLinkImageList.value = fileList;
+};
+
+// dialog确定按钮回调
+const submit = async (formEl: FormInstance | undefined) => {
+  if (!formEl) return;
+  if (friendLink.id) {
+    // 修改
+    // 先判断是否更换封面
+    if (friendLinkImageList.value.length == 0) {
+      friendLink.siteAvatar = "";
+    }
+    if (
+      friendLinkImageList.value.length != 0 &&
+      friendLinkImageList.value[0].url != friendLink.siteAvatar
+    ) {
+      await uploadFile(friendLinkImageList.value).then(response => {
+        friendLink.siteAvatar = response.url;
+      });
+    }
+    // 再校验
+    formEl.validate(async (valid, fields) => {
+      if (valid) {
+        updateFriendLink(friendLink).then(response => {
+          if (response.code == 200) {
+            message("修改成功", { type: "success" });
+            getFriendLinkList();
+            cancel();
+          } else {
+            message(response.message, { type: "error" });
+          }
+        });
+      } else {
+        return fields;
+      }
+    });
+  } else {
+    // 添加
+    // 先上传封面
+    if (friendLinkImageList.value.length != 0) {
+      await uploadFile(friendLinkImageList.value).then(response => {
+        friendLink.siteAvatar = response.url;
+      });
+    }
+    // 再校验
+    formEl.validate((valid, fields) => {
+      if (valid) {
+        delete friendLink.id;
+        friendLink.status = 1;
+        addFriendLink(friendLink).then(response => {
+          if (response.code == 200) {
+            message("添加成功", { type: "success" });
+            cancel();
+            getFriendLinkList();
+          } else {
+            message(response.message, { type: "error" });
+          }
+        });
+      } else {
+        return fields;
+      }
+    });
+  }
+};
+// checkBox处理
+const handleSelectionChange = (friendLinkList: LinkInfo[]) => {
+  // 获取选中数据的id
+  idList.value = friendLinkList.map(friendLinkInfo => {
+    return friendLinkInfo.id;
+  });
+};
+// 删除按钮回调
+const deleteBtn = (row: LinkInfo | any) => {
+  if (row.id) {
+    idList.value = [];
+    idList.value.push(row.id);
+  }
+  deleteFriendLink({ id: idList.value }).then(response => {
+    if (response.code == 200) {
+      message("删除成功", { type: "success" });
+      getFriendLinkList();
+    } else {
+      message(response.message, { type: "error" });
+    }
+  });
+  idList.value = [];
+};
+</script>
+
 <template>
   <div>
     <el-card>
@@ -328,212 +535,5 @@
     </el-dialog>
   </div>
 </template>
-
-<script setup lang="ts">
-import Search from "@iconify-icons/ep/search";
-import Plus from "@iconify-icons/ep/plus";
-import Refresh from "@iconify-icons/ep/refresh";
-import Delete from "@iconify-icons/ep/delete";
-import EditPen from "@iconify-icons/ep/edit-pen";
-import Warning from "@iconify-icons/ep/warning";
-import Check from "@iconify-icons/ep/check";
-import Close from "@iconify-icons/ep/close";
-
-import { useRenderIcon } from "@/components/ReIcon/src/hooks";
-import Upload from "@/components/ReUpload/index.vue";
-import { onMounted, ref, reactive, nextTick } from "vue";
-import {
-  getFriendLink,
-  addFriendLink,
-  updateFriendLink,
-  deleteFriendLink,
-  agreeLink
-} from "@/api/link";
-import { uploadFile } from "@/utils/upload";
-import { message } from "@/utils/message";
-import type { FormInstance, UploadUserFile } from "element-plus";
-defineOptions({
-  name: "FriendLink"
-});
-
-const queryParams = reactive<any>({
-  siteName: "",
-  currentPage: 1,
-  pageSize: 10,
-  status: 1
-});
-const queryFormRef = ref<FormInstance>();
-const friendLinkFormRef = ref<FormInstance>();
-
-const friendLinkImageList = ref<UploadUserFile[]>([]);
-const friendLink = reactive<any>({
-  id: "",
-  siteName: "",
-  siteUrl: "",
-  siteDesc: "",
-  siteAvatar: ""
-});
-const total = ref<number>(0);
-const loading = ref<boolean>(false);
-const dialogVisible = ref<boolean>(false);
-
-const friendLinkList = ref<any[]>();
-
-// 存储批量删除分类id
-const idList = ref<Array<number>>([]);
-
-onMounted(() => {
-  getFriendLinkList();
-});
-
-// 获取友链数据
-const getFriendLinkList = () => {
-  loading.value = true;
-  getFriendLink(queryParams).then(response => {
-    friendLinkList.value = response.data.LinkList;
-    total.value = response.data.total;
-    loading.value = false;
-  });
-};
-// 重置按钮回调
-const reset = () => {
-  // queryFormRef.value.resetFields(); // 无法重置
-  queryParams.siteName = "";
-  getFriendLinkList();
-};
-// 切换tabs
-const tabClick = (tabPane: any) => {
-  queryParams.status = tabPane.props.name;
-  friendLinkList.value = [];
-  getFriendLinkList();
-};
-// dialog取消按钮回调
-const cancel = () => {
-  dialogVisible.value = false;
-  friendLinkFormRef.value.resetFields();
-  friendLink.id = ""; // id不能重置
-  friendLinkImageList.value = [];
-};
-// 修改按钮回调
-const updateBtn = row => {
-  dialogVisible.value = true;
-  // dialog + form resetFields() 无法重置问题
-  nextTick(() => {
-    friendLink.id = row.id;
-    friendLink.siteName = row.siteName;
-    friendLink.siteUrl = row.siteUrl;
-    friendLink.siteDesc = row.siteDesc;
-    friendLink.siteAvatar = row.siteAvatar;
-    friendLinkImageList.value[0] = {
-      url: row.siteAvatar,
-      name: row.siteName
-    };
-  });
-};
-
-// 获取要上传的文件
-const getFileList = fileList => {
-  friendLinkImageList.value = fileList;
-};
-
-// dialog确定按钮回调
-const submit = async (formEl: FormInstance | undefined) => {
-  if (!formEl) return;
-  if (friendLink.id) {
-    // 修改
-    // 先判断是否更换封面
-    if (friendLinkImageList.value.length == 0) {
-      friendLink.friendLinkImage = "";
-    }
-    if (
-      friendLinkImageList.value.length != 0 &&
-      friendLinkImageList.value[0].url != friendLink.siteAvatar
-    ) {
-      await uploadFile(friendLinkImageList.value).then(response => {
-        friendLink.siteAvatar = response.url;
-      });
-    }
-    // 再校验
-    formEl.validate(async (valid, fields) => {
-      if (valid) {
-        updateFriendLink(friendLink).then(response => {
-          if (response.code == 200) {
-            message("修改成功", { type: "success" });
-            getFriendLinkList();
-            cancel();
-          } else {
-            message(response.message, { type: "error" });
-          }
-        });
-      } else {
-        return fields;
-      }
-    });
-  } else {
-    // 添加
-    // 先上传封面
-    if (friendLinkImageList.value.length != 0) {
-      await uploadFile(friendLinkImageList.value).then(response => {
-        friendLink.siteAvatar = response.url;
-      });
-    }
-    // 再校验
-    formEl.validate((valid, fields) => {
-      if (valid) {
-        delete friendLink.id;
-        friendLink.status = 1;
-        addFriendLink(friendLink).then(response => {
-          if (response.code == 200) {
-            message("添加成功", { type: "success" });
-            cancel();
-            getFriendLinkList();
-          } else {
-            message(response.message, { type: "error" });
-          }
-        });
-      } else {
-        return fields;
-      }
-    });
-  }
-};
-// checkBox处理
-const handleSelectionChange = friendLinkList => {
-  // 获取选中数据的id
-  idList.value = friendLinkList.map(friendLinkInfo => {
-    return friendLinkInfo.id;
-  });
-};
-// 删除按钮回调
-const deleteBtn = row => {
-  if (row.id) {
-    idList.value.push(row.id);
-  }
-  friendLink.id = idList.value;
-  deleteFriendLink(friendLink).then(response => {
-    if (response.code == 200) {
-      message("删除成功", { type: "success" });
-      getFriendLinkList();
-    } else {
-      message(response.message, { type: "error" });
-    }
-  });
-  friendLink.id = ""; // 重置id
-  idList.value = [];
-};
-// 同意友链申请
-const agreeApply = row => {
-  friendLink.id = row.id;
-  agreeLink(friendLink).then(response => {
-    if (response.code == 200) {
-      message("操作成功", { type: "success" });
-    } else {
-      message(response.message, { type: "error" });
-    }
-    friendLink.id = "";
-    getFriendLinkList();
-  });
-};
-</script>
 
 <style lang="scss" scoped></style>

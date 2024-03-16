@@ -171,7 +171,7 @@ const queryParams = reactive<QueryParams>({
 const queryFormRef = ref<FormInstance>();
 const dialogFormRef = ref<FormInstance>();
 const tagForm = reactive<TagForm>({
-  id: "",
+  id: null,
   tagName: ""
 });
 const total = ref<number>(0);
@@ -204,7 +204,7 @@ const reset = () => {
 const cancel = () => {
   dialogVisible.value = false;
   dialogFormRef.value.resetFields();
-  tagForm.id = ""; // id不能重置
+  tagForm.id = null; // id不能重置
 };
 // 修改按钮回调
 const updateBtn = (row: TagInfo) => {
@@ -224,7 +224,7 @@ const submit = (formEl: FormInstance | undefined) => {
         updateTag(tagForm).then(response => {
           if (response.code == 200) {
             message("修改成功", { type: "success" });
-            tagForm.id = "";
+            tagForm.id = null;
             getTagInfo();
           } else {
             message(response.message, { type: "error" });
@@ -270,7 +270,6 @@ const deleteTagBtn = (row: TagInfo | any) => {
       message(response.message, { type: "error" });
     }
   });
-  tagForm.id = ""; // 重置id
   idList.value = [];
 };
 </script>

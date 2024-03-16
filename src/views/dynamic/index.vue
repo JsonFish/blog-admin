@@ -90,7 +90,7 @@
         >
           <Upload
             multiple
-            :limit="4"
+            :limit="2"
             :fileList="imageList"
             @getFileList="getFile"
           />
@@ -117,16 +117,17 @@ import EditPen from "@iconify-icons/ep/edit-pen";
 import Warning from "@iconify-icons/ep/warning";
 import { message } from "@/utils/message";
 import { getDynamic, addDynamic, deleteDynamic } from "@/api/dynamic";
+import type { DynamicInfo } from "@/api/dynamic/type";
 import { uploadFileList } from "@/utils/upload";
 import type { FormInstance, UploadUserFile } from "element-plus";
-const dynamicForm = reactive({
+const dynamicForm = reactive<DynamicInfo>({
   content: "",
   images: []
 });
 const dynamicFormRef = ref<FormInstance>();
 const imageList = ref<UploadUserFile[]>([]);
 const dialogVisible = ref<boolean>(false);
-const dynamicList = ref<[]>([]);
+const dynamicList = ref<DynamicInfo[]>([]);
 const avatar = ref<string>();
 const name = ref<string>();
 onMounted(() => {
@@ -146,6 +147,7 @@ const openDialog = () => {
 const closeDialog = () => {
   dialogVisible.value = false;
   dynamicFormRef.value.resetFields();
+  imageList.value = [];
 };
 const getFile = fileList => {
   imageList.value = fileList;

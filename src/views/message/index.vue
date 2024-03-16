@@ -1,3 +1,85 @@
+<script setup lang="ts">
+import Delete from "@iconify-icons/ep/delete";
+import Warning from "@iconify-icons/ep/warning";
+import Check from "@iconify-icons/ep/check";
+import Close from "@iconify-icons/ep/close";
+import { useRenderIcon } from "@/components/ReIcon/src/hooks";
+import { onMounted, ref, reactive } from "vue";
+import { getMessage, updateMessage, deleteMessage } from "@/api/message";
+import type { QueryParams, MessageInfo } from "@/api/message/type";
+import type { TabsPaneContext } from "element-plus";
+import { message } from "@/utils/message";
+defineOptions({
+  name: "Message"
+});
+const queryParams = reactive<QueryParams>({
+  currentPage: 1,
+  pageSize: 10,
+  status: 1
+});
+const total = ref<number>(0);
+const loading = ref<boolean>(false);
+const messageList = ref<any[]>();
+// 存储批量删除的id
+const idList = ref<Array<number>>([]);
+onMounted(() => {
+  getMessageList();
+});
+
+// 获取留言
+const getMessageList = () => {
+  loading.value = true;
+  getMessage(queryParams).then(response => {
+    messageList.value = response.data.messageList;
+    total.value = response.data.total;
+    loading.value = false;
+  });
+};
+
+// 切换tabs
+const tabClick = (tabPane: TabsPaneContext) => {
+  queryParams.status = tabPane.props.name as number;
+  messageList.value = [];
+  getMessageList();
+};
+
+// checkBox处理
+const handleSelectionChange = (messageList: MessageInfo[]) => {
+  // 获取选中数据的id
+  idList.value = messageList.map(messageInfo => {
+    return messageInfo.id;
+  });
+};
+// 删除按钮回调
+const deleteBtn = (row: MessageInfo | any) => {
+  // 单点删除 而不是批量删除
+  if (row.id) {
+    idList.value = [];
+    idList.value.push(row.id);
+  }
+  deleteMessage({ id: idList.value }).then(response => {
+    if (response.code == 200) {
+      message("删除成功", { type: "success" });
+      getMessageList();
+    } else {
+      message(response.message, { type: "error" });
+    }
+  });
+  idList.value = [];
+};
+// 同意留言
+const agreeApply = (row: MessageInfo) => {
+  updateMessage({ id: row.id }).then(response => {
+    if (response.code == 200) {
+      message("操作成功", { type: "success" });
+      getMessageList();
+    } else {
+      message(response.message, { type: "error" });
+    }
+  });
+};
+</script>
+
 <template>
   <div>
     <el-card>
@@ -122,7 +204,7 @@
                   >通过</el-button
                 >
                 <el-popconfirm
-                  width="220"
+                  width="250"
                   :title="`是否删除 ${scope.row.username} 的留言?`"
                   :icon="useRenderIcon(Warning)"
                   icon-color="#f56c6c"
@@ -155,86 +237,3 @@
     </el-card>
   </div>
 </template>
-
-<script setup lang="ts">
-import Delete from "@iconify-icons/ep/delete";
-import Warning from "@iconify-icons/ep/warning";
-import Check from "@iconify-icons/ep/check";
-import Close from "@iconify-icons/ep/close";
-import { useRenderIcon } from "@/components/ReIcon/src/hooks";
-import { onMounted, ref, reactive } from "vue";
-import { getMessage, updateMessage, deleteMessage } from "@/api/message";
-import { message } from "@/utils/message";
-defineOptions({
-  name: "Message"
-});
-const queryParams = reactive<any>({
-  currentPage: 1,
-  pageSize: 10,
-  status: 1
-});
-const messageForm = reactive<any>({
-  id: ""
-});
-const total = ref<number>(0);
-const loading = ref<boolean>(false);
-const messageList = ref<any[]>();
-// 存储批量删除的id
-const idList = ref<Array<number>>([]);
-onMounted(() => {
-  getMessageList();
-});
-
-// 获取留言
-const getMessageList = () => {
-  loading.value = true;
-  getMessage(queryParams).then(response => {
-    messageList.value = response.data.messageList;
-    total.value = response.data.total;
-    loading.value = false;
-  });
-};
-
-// 切换tabs
-const tabClick = (tabPane: any) => {
-  queryParams.status = tabPane.props.name;
-  messageList.value = [];
-  getMessageList();
-};
-
-// checkBox处理
-const handleSelectionChange = messageList => {
-  // 获取选中数据的id
-  idList.value = messageList.map(messageInfo => {
-    return messageInfo.id;
-  });
-};
-// 删除按钮回调
-const deleteBtn = row => {
-  // 单点删除 而不是批量删除
-  if (row.id) {
-    idList.value.push(row.id);
-  }
-  deleteMessage({ id: idList.value }).then(response => {
-    if (response.code == 200) {
-      message("删除成功", { type: "success" });
-      getMessageList();
-    } else {
-      message(response.message, { type: "error" });
-    }
-  });
-  messageForm.id = ""; // 重置id
-  idList.value = [];
-};
-// 同意留言
-const agreeApply = row => {
-  updateMessage({ id: row.id }).then(response => {
-    if (response.code == 200) {
-      message("操作成功", { type: "success" });
-    } else {
-      message(response.message, { type: "error" });
-    }
-    getMessageList();
-  });
-};
-</script>

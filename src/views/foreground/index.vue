@@ -200,12 +200,12 @@ const updateBtn = () => {
   updateInfo(information.value).then(response => {
     if (response.code == 200) {
       message("修改成功", { type: "success" });
+      getInformation();
     } else {
       message(response.message, { type: "error" });
     }
     edit.value = false;
     hiddenDeleteBtn.value = true;
-    getInformation();
   });
 };
 </script>

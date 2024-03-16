@@ -14,7 +14,7 @@ export interface QueryParams {
   pageSize: number;
 }
 export interface TagForm {
-  id?: number[] | number | string;
+  id?: number;
   tagName: string;
 }
 export interface DeleteParams {
