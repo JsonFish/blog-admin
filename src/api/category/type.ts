@@ -16,7 +16,10 @@ export interface QueryParams {
   pageSize: number;
 }
 export interface CategoryForm {
-  id: number[] | number | string;
+  id?: number[] | number | string;
   categoryName: string;
   categoryImage: string;
+}
+export interface DeleteParams {
+  id: number[];
 }

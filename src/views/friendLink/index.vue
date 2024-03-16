@@ -246,7 +246,7 @@
       append-to-body
       :title="friendLink.id ? '修改友链' : '新增友链'"
       v-model="dialogVisible"
-      width="30%"
+      width="30vw"
       :before-close="cancel"
     >
       <el-form :model="friendLink" ref="friendLinkFormRef" label-width="100px">

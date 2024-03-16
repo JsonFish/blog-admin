@@ -11,7 +11,7 @@ import { useRenderIcon } from "@/components/ReIcon/src/hooks";
 import { message } from "@/utils/message";
 import { ref, reactive, onMounted } from "vue";
 import { useRouter } from "vue-router";
-import type { QueryParams } from "@/api/article/type";
+import type { QueryParams, ArticleInfo } from "@/api/article/type";
 import {
   getArticle,
   getDraft,
@@ -32,7 +32,7 @@ const queryParams = reactive<QueryParams>({
 });
 const router = useRouter();
 const total = ref<number>(0);
-const articleList = ref([]);
+const articleList = ref<ArticleInfo[]>([]);
 const loading = ref<boolean>(false);
 
 onMounted(() => {
@@ -59,6 +59,10 @@ const getDraftList = () => {
 // 重置按钮
 const reset = () => {
   queryParams.articleTitle = "";
+  if (queryParams.status == 2) {
+    getDraftList();
+    return;
+  }
   getArticleLsit();
 };
 
@@ -74,21 +78,21 @@ const tabClick = (tabPane: TabsPaneContext) => {
 };
 
 // 编辑文章
-const updateArticle = row => {
-  router.push({ path: "/article/add", query: { id: row.id } });
+const updateArticle = (id: number) => {
+  router.push({ path: "/article/edit", query: { id } });
 };
 
 // 编辑草稿
-const edidDraft = row => {
+const edidDraft = (row: ArticleInfo) => {
   router.push({
-    path: "/article/add",
+    path: "/article/edit",
     query: { id: row.id, status: row.status }
   });
 };
 
 // 显示隐藏文章
-const updateArticleStatus = row => {
-  updateStatus({ id: row.id }).then(response => {
+const updateArticleStatus = (id: number) => {
+  updateStatus({ id }).then(response => {
     if (response.code == 200) {
       message("操作成功", { type: "success" });
       getArticleLsit();
@@ -99,15 +103,11 @@ const updateArticleStatus = row => {
 };
 
 // 删除文章
-const deleteBtn = row => {
-  deletArticle({ id: row.id }).then(response => {
+const deleteBtn = (id: number) => {
+  deletArticle({ id }).then(response => {
     if (response.code == 200) {
       message("删除成功", { type: "success" });
-      if (queryParams.status == 2) {
-        getDraftList();
-      } else {
-        getArticleLsit();
-      }
+      getDraftList();
     } else {
       message(response.message, { type: "error" });
     }
@@ -115,8 +115,8 @@ const deleteBtn = row => {
 };
 
 // 删除草稿
-const deleteDraftBtn = row => {
-  deleteDraft({ id: row.id }).then(response => {
+const deleteDraftBtn = (id: number) => {
+  deleteDraft({ id }).then(response => {
     if (response.code == 200) {
       message("删除成功", { type: "success" });
       if (queryParams.status == 2) {
@@ -138,7 +138,7 @@ const deleteDraftBtn = row => {
         <div class="card-header">
           <span>文章管理</span>
           <el-button
-            @click="router.push('/article/add')"
+            @click="router.push('/article/edit')"
             :icon="useRenderIcon(EditPen)"
             type="primary"
             text
@@ -147,12 +147,7 @@ const deleteDraftBtn = row => {
         </div>
       </template>
       <el-row>
-        <el-form
-          size="small"
-          :model="queryParams"
-          :inline="true"
-          ref="queryFormRef"
-        >
+        <el-form :model="queryParams" :inline="true" ref="queryFormRef">
           <el-form-item label="标题">
             <el-input
               clearable
@@ -163,18 +158,13 @@ const deleteDraftBtn = row => {
           </el-form-item>
         </el-form>
         <el-button
-          size="small"
           :disabled="!queryParams.articleTitle"
           type="primary"
           :icon="useRenderIcon(Search)"
           @click="getArticleLsit"
           >搜索</el-button
         >
-        <el-button
-          size="small"
-          type="info"
-          :icon="useRenderIcon(Refresh)"
-          @click="reset"
+        <el-button type="info" :icon="useRenderIcon(Refresh)" @click="reset"
           >重置</el-button
         >
       </el-row>
@@ -273,7 +263,7 @@ const deleteDraftBtn = row => {
               <template #default="scope">
                 <div class="btnClass">
                   <el-button
-                    @click="updateArticle(scope.row)"
+                    @click="updateArticle(scope.row.id)"
                     link
                     type="primary"
                     size="small"
@@ -281,10 +271,10 @@ const deleteDraftBtn = row => {
                     >修改</el-button
                   >
                   <el-popconfirm
-                    width="220"
+                    width="250"
                     :title="`是否隐藏文章 ${scope.row.articleTitle} ?`"
                     :icon="useRenderIcon(Hide)"
-                    @confirm="updateArticleStatus(scope.row)"
+                    @confirm="updateArticleStatus(scope.row.id)"
                     icon-color="#f3d6a9"
                   >
                     <template #reference>
@@ -298,10 +288,10 @@ const deleteDraftBtn = row => {
                     </template>
                   </el-popconfirm>
                   <el-popconfirm
-                    width="220"
+                    width="250"
                     :title="`是否删除文章: ${scope.row.articleTitle} ?`"
                     :icon="useRenderIcon(Warning)"
-                    @confirm="deleteBtn(scope.row)"
+                    @confirm="deleteBtn(scope.row.id)"
                     icon-color="#f56c6c"
                   >
                     <template #reference>
@@ -413,7 +403,7 @@ const deleteDraftBtn = row => {
               <template #default="scope">
                 <div class="btnClass">
                   <el-button
-                    @click="updateArticle(scope.row)"
+                    @click="updateArticle(scope.row.id)"
                     link
                     size="small"
                     type="primary"
@@ -421,10 +411,10 @@ const deleteDraftBtn = row => {
                     >修改</el-button
                   >
                   <el-popconfirm
-                    width="220"
+                    width="250"
                     :title="`是否公开文章 ${scope.row.articleTitle} ?`"
                     :icon="useRenderIcon(View)"
-                    @confirm="updateArticleStatus(scope.row)"
+                    @confirm="updateArticleStatus(scope.row.id)"
                     icon-color="#90c23a"
                   >
                     <template #reference>
@@ -438,10 +428,10 @@ const deleteDraftBtn = row => {
                     </template>
                   </el-popconfirm>
                   <el-popconfirm
-                    width="220"
+                    width="250"
                     :title="`是否删除文章 ${scope.row.articleTitle} ?`"
                     :icon="useRenderIcon(Warning)"
-                    @confirm="deleteBtn(scope.row)"
+                    @confirm="deleteBtn(scope.row.id)"
                     icon-color="#f56c6c"
                   >
                     <template #reference>
@@ -506,10 +496,10 @@ const deleteDraftBtn = row => {
                     >编辑</el-button
                   >
                   <el-popconfirm
-                    width="220"
+                    width="250"
                     :title="`是否删除草稿 ${scope.row.articleTitle} ?`"
                     :icon="useRenderIcon(Warning)"
-                    @confirm="deleteDraftBtn(scope.row)"
+                    @confirm="deleteDraftBtn(scope.row.id)"
                     icon-color="#f56c6c"
                   >
                     <template #reference>

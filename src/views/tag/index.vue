@@ -46,8 +46,8 @@
         @selection-change="handleSelectionChange"
         style="height: calc(100vh - 320px)"
       >
-        <el-table-column type="selection" width="50" />
-        <el-table-column type="index" align="center" label="#" width="60" />
+        <el-table-column type="selection" width="40" />
+        <el-table-column type="index" align="center" label="#" width="50" />
         <el-table-column
           prop="tagName"
           align="center"
@@ -216,7 +216,6 @@ const updateBtn = (row: TagInfo) => {
   });
 };
 
-// dialog确定按钮回调
 const submit = (formEl: FormInstance | undefined) => {
   if (!formEl) return;
   formEl.validate((valid, fields) => {
@@ -225,25 +224,25 @@ const submit = (formEl: FormInstance | undefined) => {
         updateTag(tagForm).then(response => {
           if (response.code == 200) {
             message("修改成功", { type: "success" });
-            dialogVisible.value = false;
-            dialogFormRef.value.resetFields();
-            getTagInfo();
             tagForm.id = "";
+            getTagInfo();
           } else {
             message(response.message, { type: "error" });
           }
+          dialogVisible.value = false;
+          dialogFormRef.value.resetFields();
         });
       } else {
         delete tagForm.id;
         addTag(tagForm).then(response => {
           if (response.code == 200) {
             message("添加成功", { type: "success" });
-            dialogVisible.value = false;
-            dialogFormRef.value.resetFields();
             getTagInfo();
           } else {
             message(response.message, { type: "error" });
           }
+          dialogVisible.value = false;
+          dialogFormRef.value.resetFields();
         });
       }
     } else {
@@ -259,18 +258,16 @@ const handleSelectionChange = (tagList: TagInfo[]) => {
 };
 // 删除按钮回调
 const deleteTagBtn = (row: TagInfo | any) => {
-  delete tagForm.tagName;
   if (row.id) {
     idList.value = [];
     idList.value.push(row.id);
   }
-  tagForm.id = idList.value;
-  deleteTag(tagForm).then(response => {
+  deleteTag({ id: idList.value }).then(response => {
     if (response.code == 200) {
       message("删除成功", { type: "success" });
       getTagInfo();
     } else {
-      message("删除失败", { type: "error" });
+      message(response.message, { type: "error" });
     }
   });
   tagForm.id = ""; // 重置id

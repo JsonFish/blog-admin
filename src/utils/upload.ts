@@ -16,6 +16,7 @@ export const uploadFileList: UrlInfo[] | any = async (
             .then(res => {
               if (res.code == 200) return rev(res.data);
               message(res.message, { type: "error" });
+              return rej(res);
             })
             .catch(error => rej(error));
         });
@@ -33,6 +34,7 @@ export const uploadFile: UrlInfo | any = async (fileList: UploadUserFile[]) => {
         .then(res => {
           if (res.code == 200) return rev(res.data);
           message(res.message, { type: "error" });
+          return rej(res);
         })
         .catch(error => rej(error));
     });

@@ -1,46 +1,54 @@
 import { http } from "@/utils/http";
-import type { QueryParams } from "./type";
-enum API {
-  ARTICLE = "/article",
-  DRAFT = "/article/draft",
-  ARTICLE_STATUS = "/article/status"
+import type { QueryParams, ArticleData, ArticleInfo } from "./type";
+enum Path {
+  Article = "/article",
+  Draft = "/article/draft",
+  Status = "/article/status"
 }
+
 // 获取文章列表
 export const getArticle = (params: QueryParams) => {
-  return http.request<BaseResponse<any>>("get", API.ARTICLE, { params });
+  return http.request<BasicResponse<ArticleData>>("get", Path.Article, {
+    params
+  });
 };
+
 // 新增文章
-export const addArticle = (data: object) => {
-  return http.request<BaseResponse<any>>("post", API.ARTICLE, { data });
+export const addArticle = (data: ArticleInfo) => {
+  return http.request<BasicResponse>("post", Path.Article, { data });
 };
+
 // 修改文章
-export const updateArticle = (data: object) => {
-  return http.request<BaseResponse<any>>("put", API.ARTICLE, { data });
+export const updateArticle = (data: ArticleInfo) => {
+  return http.request<BasicResponse>("put", Path.Article, { data });
 };
+
 // 修改文章状态
-export const updateStatus = (data: object) => {
-  return http.request<BaseResponse<any>>("put", API.ARTICLE_STATUS, { data });
+export const updateStatus = (data: { id: number }) => {
+  return http.request<BasicResponse>("put", Path.Status, { data });
 };
+
 // 删除文章
-export const deletArticle = (data: object) => {
-  return http.request<BaseResponse<any>>("delete", API.ARTICLE, { data });
+export const deletArticle = (data: { id: number }) => {
+  return http.request<BasicResponse>("delete", Path.Article, { data });
 };
 
 // 获取草稿
 export const getDraft = (params: QueryParams) => {
-  return http.request<BaseResponse<any>>("get", API.DRAFT, { params });
+  return http.request<BasicResponse>("get", Path.Draft, { params });
 };
 
 // 新增草稿
-export const addDraft = (data: object) => {
-  return http.request<BaseResponse<any>>("post", API.DRAFT, { data });
+export const addDraft = (data: ArticleInfo) => {
+  return http.request<BasicResponse>("post", Path.Draft, { data });
 };
 
 // 修改草稿
-export const updateDraft = (data: object) => {
-  return http.request<BaseResponse<any>>("put", API.DRAFT, { data });
+export const updateDraft = (data: ArticleInfo) => {
+  return http.request<BasicResponse>("put", Path.Draft, { data });
 };
+
 // 删除草稿
-export const deleteDraft = (data: object) => {
-  return http.request<BaseResponse<any>>("delete", API.DRAFT, { data });
+export const deleteDraft = (data: { id: number }) => {
+  return http.request<BasicResponse>("delete", Path.Draft, { data });
 };

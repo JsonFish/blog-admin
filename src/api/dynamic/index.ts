@@ -1,13 +1,13 @@
 import { http } from "@/utils/http";
 enum API {
-  Dynamic = "/talk"
+  Dynamic = "/daily"
 }
 export const getDynamic = () => {
-  return http.request<BaseResponse<any>>("get", API.Dynamic);
+  return http.request<BasicResponse>("get", API.Dynamic);
 };
 export const addDynamic = (data: any) => {
-  return http.request<BaseResponse<any>>("post", API.Dynamic, { data });
+  return http.request<BasicResponse>("post", API.Dynamic, { data });
 };
 export const deleteDynamic = (data: any) => {
-  return http.request<BaseResponse<any>>("delete", API.Dynamic, { data });
+  return http.request<BasicResponse>("delete", API.Dynamic, { data });
 };

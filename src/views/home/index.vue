@@ -7,7 +7,7 @@ defineOptions({
 });
 const fileList = ref([
   {
-    url: "http://sa6qp7vwh.hb-bkt.clouddn.com/1710462107201.png"
+    url: "http://sa6qp7vwh.hb-bkt.clouddn.com/1710462107180.png"
   },
   {
     url: "http://sa6qp7vwh.hb-bkt.clouddn.com/1710462107180.png"

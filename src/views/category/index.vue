@@ -6,7 +6,7 @@
       </template>
       <el-row>
         <el-form :model="queryParams" :inline="true" ref="queryFormRef">
-          <el-form-item label="搜索分类">
+          <el-form-item label="分类名称">
             <el-input
               v-model="queryParams.categoryName"
               placeholder="请输入分类名称"
@@ -52,21 +52,21 @@
         <el-table-column
           prop="categoryName"
           align="center"
-          label="分类"
-          width="200"
+          label="分类名称"
+          width="150"
         />
         <el-table-column
           prop="categoryImage"
           label="封面"
           align="center"
-          width="200"
+          width="220"
         >
           <template v-slot="scope">
             <el-image
               preview-teleported
               hide-on-click-modal
               :preview-src-list="[scope.row.categoryImage]"
-              style="width: 128px; height: 72px"
+              style="width: 170px; height: 90px"
               :src="scope.row.categoryImage"
               fit="cover"
             />
@@ -84,7 +84,7 @@
           label="更新时间"
           width="300"
         />
-        <el-table-column prop="address" label="操作">
+        <el-table-column prop="address" label="操作" min-width="200px">
           <template #default="scope">
             <div class="btnClass">
               <el-button
@@ -184,6 +184,7 @@
 </template>
 
 <script setup lang="ts">
+import { onMounted, ref, reactive, nextTick } from "vue";
 import Search from "@iconify-icons/ep/search";
 import Plus from "@iconify-icons/ep/plus";
 import Refresh from "@iconify-icons/ep/refresh";
@@ -192,7 +193,9 @@ import EditPen from "@iconify-icons/ep/edit-pen";
 import Warning from "@iconify-icons/ep/warning";
 import { useRenderIcon } from "@/components/ReIcon/src/hooks";
 import Upload from "@/components/ReUpload/index.vue";
-import { onMounted, ref, reactive, nextTick } from "vue";
+import { uploadFile } from "@/utils/upload";
+import { message } from "@/utils/message";
+import type { FormInstance, UploadUserFile } from "element-plus";
 import type {
   CategoryInfo,
   QueryParams,
@@ -204,9 +207,6 @@ import {
   updateCategory,
   deleteCategory
 } from "@/api/category";
-import { uploadFile } from "@/utils/upload";
-import { message } from "@/utils/message";
-import type { FormInstance, UploadUserFile } from "element-plus";
 defineOptions({
   name: "Category"
 });
@@ -231,7 +231,6 @@ const dialogVisible = ref<boolean>(false);
 
 const categoryList = ref<CategoryInfo[]>();
 
-// 存储批量删除分类id
 const idList = ref<Array<number>>([]);
 
 onMounted(() => {
@@ -276,15 +275,14 @@ const updateBtn = (row: CategoryInfo) => {
 };
 
 // 获取要上传的文件
-const getFileList = fileList => {
+const getFileList = (fileList: UploadUserFile[]) => {
   categoryImageList.value = fileList;
 };
 
-// dialog确定按钮回调
 const submit = async (formEl: FormInstance | undefined) => {
   if (!formEl) return;
+  // 修改
   if (categoryForm.id) {
-    // 修改
     // 先判断是否更换封面
     if (categoryImageList.value.length == 0) {
       categoryForm.categoryImage = "";
@@ -304,35 +302,41 @@ const submit = async (formEl: FormInstance | undefined) => {
           if (response.code == 200) {
             message("修改成功", { type: "success" });
             getCategoryInfo();
-            cancel();
           } else {
             message(response.message, { type: "error" });
           }
+          cancel();
         });
       } else {
         return fields;
       }
     });
   } else {
-    // 添加
-    // 先上传封面
+    // 新增
+    // 判断是否选择了图片
     if (categoryImageList.value.length != 0) {
-      await uploadFile(categoryImageList.value).then(response => {
-        categoryForm.categoryImage = response.url;
-      });
+      // 先赋值,防止校验提示
+      categoryForm.categoryImage = categoryImageList.value[0].url;
+    }
+    // 选择图片后校验 删除图片后删除赋值 显示校验提示
+    if (categoryImageList.value.length == 0) {
+      categoryForm.categoryImage = "";
     }
     // 再校验
-    formEl.validate((valid, fields) => {
+    formEl.validate(async (valid, fields) => {
       if (valid) {
+        await uploadFile(categoryImageList.value).then(response => {
+          categoryForm.categoryImage = response.url;
+        });
         delete categoryForm.id;
         addCategory(categoryForm).then(response => {
           if (response.code == 200) {
             message("添加成功", { type: "success" });
-            cancel();
             getCategoryInfo();
           } else {
             message(response.message, { type: "error" });
           }
+          cancel();
         });
       } else {
         return fields;
@@ -346,15 +350,13 @@ const handleSelectionChange = (categoryList: CategoryInfo[]) => {
     return categoryInfo.id;
   });
 };
-// 删除按钮回调
-const deleteBtn = (row: CategoryInfo | any) => {
-  delete categoryForm.categoryName;
+// 删除按钮
+const deleteBtn = async (row: CategoryInfo | any) => {
   if (row.id) {
     idList.value = [];
     idList.value.push(row.id);
   }
-  categoryForm.id = idList.value;
-  deleteCategory(categoryForm).then(response => {
+  await deleteCategory({ id: idList.value }).then(response => {
     if (response.code == 200) {
       message("删除成功", { type: "success" });
       getCategoryInfo();
@@ -371,24 +373,24 @@ const deleteBtn = (row: CategoryInfo | any) => {
 .upload {
   :deep(.el-form-item__content) {
     width: 208px !important;
-    height: 117px !important;
+    height: 130px !important;
   }
 
   :deep(.el-upload-list__item) {
     width: 208px !important;
-    height: 117px !important;
+    height: 130px !important;
     margin: 0 !important;
     border: none !important;
   }
 
   :deep(.el-upload--picture-card) {
     width: 208px !important;
-    height: 117px !important;
+    height: 130px !important;
   }
 
   :deep(.el-upload-list--picture-card) {
     width: 208px !important;
-    height: 117px !important;
+    height: 130px !important;
     margin: 0 !important;
     border: none !important;
   }

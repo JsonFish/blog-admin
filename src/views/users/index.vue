@@ -5,7 +5,12 @@
         <div>用户管理</div>
       </template>
       <el-row>
-        <el-form :model="queryParams" :inline="true" ref="queryFormRef">
+        <el-form
+          size="small"
+          :model="queryParams"
+          :inline="true"
+          ref="queryFormRef"
+        >
           <el-form-item label="用户名">
             <el-input
               clearable
@@ -16,13 +21,18 @@
           </el-form-item>
         </el-form>
         <el-button
+          size="small"
           :disabled="!queryParams.username"
           type="primary"
           :icon="useRenderIcon(Search)"
           @click="getUsers"
           >搜索</el-button
         >
-        <el-button type="info" :icon="useRenderIcon(Refresh)" @click="reset"
+        <el-button
+          size="small"
+          type="info"
+          :icon="useRenderIcon(Refresh)"
+          @click="reset"
           >重置</el-button
         >
       </el-row>
@@ -62,6 +72,7 @@
             }}</el-tag>
           </template>
         </el-table-column>
+        <el-table-column prop="ip" align="center" label="ip" min-width="100" />
         <el-table-column
           prop="create_time"
           align="center"

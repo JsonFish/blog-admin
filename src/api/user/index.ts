@@ -5,9 +5,9 @@ export const getUserList = (params: object) => {
 };
 /** 修改用户信息 */
 export const updateUser = (data: object) => {
-  return http.request<BaseResponse<any>>("put", "/user", { data });
+  return http.request<BasicResponse>("put", "/user", { data });
 };
 /** 拉黑用户 */
 export const changeUserStatus = (data: object) => {
-  return http.request<BaseResponse<any>>("delete", `/user`, { data });
+  return http.request<BasicResponse>("delete", `/user`, { data });
 };

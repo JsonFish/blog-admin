@@ -157,9 +157,9 @@ declare global {
     $storage: ResponsiveStorage;
     $config: ServerConfigs;
   }
-  interface BaseResponse<T> {
+  interface BasicResponse<T = any> {
     code: number,
-    data: T,
+    data: T
     message: string
   }
 }

@@ -25,7 +25,7 @@ export type RefreshTokenResult = {
 
 /** 获取图片验证码 */
 export const getCaptcha = () => {
-  return http.get<any, BaseResponse<any>>("/imageCaptcha");
+  return http.get<any, BasicResponse>("/imageCaptcha");
 };
 
 /** 登录 */

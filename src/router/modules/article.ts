@@ -22,11 +22,11 @@ export default {
       }
     },
     {
-      path: "/article/add",
-      name: "AddArticle",
+      path: "/article/edit",
+      name: "EditArticle",
       component: () => import("@/views/editArticle/index.vue"),
       meta: {
-        title: "新增文章",
+        title: "编辑文章",
         icon: Edit,
         showLink: true
       }

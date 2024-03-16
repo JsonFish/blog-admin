@@ -17,3 +17,6 @@ export interface TagForm {
   id?: number[] | number | string;
   tagName: string;
 }
+export interface DeleteParams {
+  id: number[];
+}
