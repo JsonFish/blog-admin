@@ -4,10 +4,10 @@ import Axios, {
   CustomParamsSerializer
 } from "axios";
 import {
-  PureHttpError,
+  HttpError,
   RequestMethods,
-  PureHttpResponse,
-  PureHttpRequestConfig
+  HttpResponse,
+  HttpRequestConfig
 } from "./types.d";
 import { stringify } from "qs";
 
@@ -19,7 +19,7 @@ import { message } from "@/utils/message";
 // 相关配置请参考：www.axios-js.com/zh-cn/docs/#axios-request-config-1
 const defaultConfig: AxiosRequestConfig = {
   // 请求超时时间
-  timeout: 5000,
+  timeout: 10000,
   // 请求头
   headers: {
     Accept: "application/json, text/plain, multipart/form-data, */*",
@@ -32,7 +32,7 @@ const defaultConfig: AxiosRequestConfig = {
   }
 };
 
-class PureHttp {
+class Http {
   constructor() {
     this.httpInterceptorsRequest();
     this.httpInterceptorsResponse();
@@ -42,14 +42,14 @@ class PureHttp {
   /** 防止重复刷新token */
   private static isRefreshing = false;
   /** 初始化配置对象 */
-  private static initConfig: PureHttpRequestConfig = {};
+  private static initConfig: HttpRequestConfig = {};
   /** 保存当前Axios实例对象 */
   private static axiosInstance: AxiosInstance = Axios.create(defaultConfig);
 
   /** 请求拦截 */
   private httpInterceptorsRequest(): void {
-    PureHttp.axiosInstance.interceptors.request.use(
-      async (config: PureHttpRequestConfig): Promise<any> => {
+    Http.axiosInstance.interceptors.request.use(
+      async (config: HttpRequestConfig): Promise<any> => {
         // 如果是刷新token接口 更换token
         if (config.url == "/refreshToken") {
           config.headers["Authorization"] = formatToken(
@@ -68,8 +68,8 @@ class PureHttp {
           config.beforeRequestCallback(config);
           return config;
         }
-        if (PureHttp.initConfig.beforeRequestCallback) {
-          PureHttp.initConfig.beforeRequestCallback(config);
+        if (Http.initConfig.beforeRequestCallback) {
+          Http.initConfig.beforeRequestCallback(config);
           return config;
         }
         return config;
@@ -82,10 +82,10 @@ class PureHttp {
 
   /** 响应拦截 */
   private httpInterceptorsResponse(): void {
-    const instance = PureHttp.axiosInstance;
+    const instance = Http.axiosInstance;
     instance.interceptors.response.use(
       // 成功响应拦截
-      (response: PureHttpResponse) => {
+      (response: HttpResponse) => {
         const $config = response.config;
         // 关闭进度条动画
         NProgress.done();
@@ -94,15 +94,15 @@ class PureHttp {
           $config.beforeResponseCallback(response);
           return response.data;
         }
-        if (PureHttp.initConfig.beforeResponseCallback) {
-          PureHttp.initConfig.beforeResponseCallback(response);
+        if (Http.initConfig.beforeResponseCallback) {
+          Http.initConfig.beforeResponseCallback(response);
           return response.data;
         }
 
         return response.data;
       },
       // 失败响应拦截
-      async (error: PureHttpError) => {
+      async (error: HttpError) => {
         // accessToken过期 不是refreshToken过期
         if (
           error.response.status === 401 &&
@@ -110,8 +110,8 @@ class PureHttp {
         ) {
           const config = error.config;
           // 判断是否正在刷新token
-          if (!PureHttp.isRefreshing) {
-            PureHttp.isRefreshing = true;
+          if (!Http.isRefreshing) {
+            Http.isRefreshing = true;
             return useUserStore()
               .handRefreshToken()
               .then(
@@ -119,34 +119,33 @@ class PureHttp {
                 response => {
                   const token = response.data.accessToken;
                   // 设置 Authorization 字段
-                  PureHttp.axiosInstance.defaults.headers.common.Authorization =
+                  Http.axiosInstance.defaults.headers.common.Authorization =
                     formatToken(token);
                   // //执行requests队列中的请求，（requests中存的不是请求参数，而是请求的Promise函数，这里直接拿来执行就好）
-                  PureHttp.requests.forEach(cb => cb(token));
+                  Http.requests.forEach(cb => cb(token));
                   // 执行requests队列中的请求后赋值为空
-                  PureHttp.requests = [];
+                  Http.requests = [];
                   //重新执行当前未执行成功的请求并返回
                   return instance.request(config);
                 },
-                // token刷新失败 退出登录
                 reason => {
-                  PureHttp.isRefreshing = false;
+                  Http.isRefreshing = false;
                   message(reason.message, { type: "error" });
                 }
               )
               .catch(err => {
-                PureHttp.isRefreshing = false;
+                Http.isRefreshing = false;
                 throw err;
               })
               .finally(() => {
-                PureHttp.isRefreshing = false;
+                Http.isRefreshing = false;
               });
           } else {
             // 如果正在刷新token，将刷新token过程中的发起的请求存储起来
             return new Promise(resolve => {
               // 将请求放进队列，用一个函数形式来保存，等token刷新后直接执行
-              PureHttp.requests = [
-                ...PureHttp.requests,
+              Http.requests = [
+                ...Http.requests,
                 token =>
                   resolve(
                     instance.request({
@@ -158,9 +157,6 @@ class PureHttp {
                     })
                   )
               ];
-              // PureHttp.requests.push(() => {
-              //   resolve(instance.request(config));
-              // });
             });
           }
         }
@@ -169,11 +165,11 @@ class PureHttp {
           error.response.status === 401 &&
           error.config.url == "/refreshToken"
         ) {
-          PureHttp.isRefreshing = false;
-          message("refreshToken失效 , 请重新登录", { type: "error" });
+          Http.isRefreshing = false;
+          message("身份过期 , 请重新登录", { type: "error" });
           useUserStore().logOut();
         } else {
-          PureHttp.isRefreshing = false;
+          Http.isRefreshing = false;
           const $error = error;
           let msg: string;
           if ($error.response.status) {
@@ -202,18 +198,18 @@ class PureHttp {
     method: RequestMethods,
     url: string,
     param?: AxiosRequestConfig,
-    axiosConfig?: PureHttpRequestConfig
+    axiosConfig?: HttpRequestConfig
   ): Promise<T> {
     const config = {
       method,
       url,
       ...param,
       ...axiosConfig
-    } as PureHttpRequestConfig;
+    } as HttpRequestConfig;
 
     // 单独处理自定义请求/响应回调
     return new Promise((resolve, reject) => {
-      PureHttp.axiosInstance
+      Http.axiosInstance
         .request(config)
         .then((response: undefined) => {
           resolve(response);
@@ -228,7 +224,7 @@ class PureHttp {
   public post<T, P>(
     url: string,
     params?: AxiosRequestConfig<T>,
-    config?: PureHttpRequestConfig
+    config?: HttpRequestConfig
   ): Promise<P> {
     return this.request<P>("post", url, params, config);
   }
@@ -237,10 +233,10 @@ class PureHttp {
   public get<T, P>(
     url: string,
     params?: AxiosRequestConfig<T>,
-    config?: PureHttpRequestConfig
+    config?: HttpRequestConfig
   ): Promise<P> {
     return this.request<P>("get", url, params, config);
   }
 }
 
-export const http = new PureHttp();
+export const http = new Http();
