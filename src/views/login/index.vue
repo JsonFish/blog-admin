@@ -40,7 +40,7 @@ dataThemeChange();
 // 图片验证码 base64格式
 const captchaImage = ref<string>();
 const loginForm = reactive({
-  email: "1557392527@qq.com",
+  email: "test@qq.com",
   password: "123456",
   code: "",
   captchaId: ""
@@ -54,18 +54,18 @@ const getCaptchaImg = async () => {
   loginForm.captchaId = result.data.id;
 };
 
-// 节流
-let timer = null;
-const getCaptchaThrottle = () => {
-  if (timer == null) {
-    timer = setTimeout(async () => {
-      loginForm.code = "";
-      getCaptchaImg();
-      clearTimeout(timer);
-      timer = null;
-    }, 500);
+// 图片验证码防抖
+let time: any = null;
+const debounce = async () => {
+  if (time == null) {
+    await getCaptchaImg();
   }
+  clearTimeout(time);
+  time = setTimeout(() => {
+    time = null;
+  }, 1000);
 };
+
 // 登录
 const onLogin = async (formEl: FormInstance | undefined) => {
   if (!formEl) return;
@@ -197,7 +197,7 @@ onBeforeUnmount(() => {
 
                 <div
                   style="width: 30%; height: 100%; margin-left: 5%"
-                  @click="getCaptchaThrottle"
+                  @click="debounce"
                 >
                   <img
                     style="width: 100%; height: 100%"
@@ -235,4 +235,3 @@ onBeforeUnmount(() => {
   padding: 0;
 }
 </style>
-@/api/login
