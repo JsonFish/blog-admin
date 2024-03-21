@@ -327,7 +327,7 @@ const submit = async (formEl: FormInstance | undefined) => {
           message("修改成功", { type: "success" });
           getUsers();
         } else {
-          message("修改失败", { type: "error" });
+          message(response.message, { type: "error" });
         }
         cancel();
       });

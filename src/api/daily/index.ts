@@ -1,10 +1,12 @@
 import { http } from "@/utils/http";
 import { DynamicData, DynamicInfo } from "./type";
 enum Path {
-  Dynamic = "/dynamic"
+  Dynamic = "/daily"
 }
-export const getDynamic = () => {
-  return http.request<BasicResponse<DynamicData>>("get", Path.Dynamic);
+export const getDynamic = (params: any) => {
+  return http.request<BasicResponse<DynamicData>>("get", Path.Dynamic, {
+    params
+  });
 };
 export const addDynamic = (data: DynamicInfo) => {
   return http.request<BasicResponse>("post", Path.Dynamic, { data });

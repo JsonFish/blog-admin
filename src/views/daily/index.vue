@@ -51,7 +51,19 @@
           </el-card>
         </el-col>
       </el-row>
-      <template #footer> 底部 可以做分页 </template>
+      <template #footer>
+        <el-pagination
+          v-model:current-page="queryParams.currentPage"
+          v-model:page-size="queryParams.pageSize"
+          :page-sizes="[8, 12, 16]"
+          :small="true"
+          background
+          layout="->,total, sizes, prev, pager, next,jumper"
+          :total="total"
+          @size-change="getDynamicList"
+          @current-change="getDynamicList"
+        />
+      </template>
     </el-card>
     <el-dialog
       title="发表日常"
@@ -116,8 +128,8 @@ import { useRenderIcon } from "@/components/ReIcon/src/hooks";
 import EditPen from "@iconify-icons/ep/edit-pen";
 import Warning from "@iconify-icons/ep/warning";
 import { message } from "@/utils/message";
-import { getDynamic, addDynamic, deleteDynamic } from "@/api/dynamic";
-import type { DynamicInfo } from "@/api/dynamic/type";
+import { getDynamic, addDynamic, deleteDynamic } from "@/api/daily";
+import type { DynamicInfo } from "@/api/daily/type";
 import { uploadFileList } from "@/utils/upload";
 import type { FormInstance, UploadUserFile } from "element-plus";
 const dynamicForm = reactive<DynamicInfo>({
@@ -130,15 +142,21 @@ const dialogVisible = ref<boolean>(false);
 const dynamicList = ref<DynamicInfo[]>([]);
 const avatar = ref<string>();
 const name = ref<string>();
+const total = ref<number>();
+const queryParams = reactive<any>({
+  currentPage: 1,
+  pageSize: 8
+});
 onMounted(() => {
   getDynamicList();
 });
 // 获取动态
 const getDynamicList = () => {
-  getDynamic().then(response => {
+  getDynamic(queryParams).then(response => {
     dynamicList.value = response.data.dynamicList;
     avatar.value = response.data.avatar;
     name.value = response.data.username;
+    total.value = response.data.total;
   });
 };
 const openDialog = () => {
@@ -198,3 +216,4 @@ const deleteBtn = (id: number) => {
   align-items: center;
 }
 </style>
+@/api/daily@/api/daily/type
