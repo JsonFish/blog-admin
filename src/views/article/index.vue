@@ -79,7 +79,7 @@ const tabClick = (tabPane: TabsPaneContext) => {
 
 // 编辑文章
 const updateArticle = (id: number) => {
-  router.push({ path: "/article/edit", query: { id } });
+  router.push({ path: "/article", query: { id } });
 };
 
 // 编辑草稿
@@ -107,7 +107,7 @@ const deleteBtn = (id: number) => {
   deletArticle({ id }).then(response => {
     if (response.code == 200) {
       message("删除成功", { type: "success" });
-      getDraftList();
+      getArticleLsit();
     } else {
       message(response.message, { type: "error" });
     }
@@ -119,11 +119,7 @@ const deleteDraftBtn = (id: number) => {
   deleteDraft({ id }).then(response => {
     if (response.code == 200) {
       message("删除成功", { type: "success" });
-      if (queryParams.status == 2) {
-        getDraftList();
-      } else {
-        getArticleLsit();
-      }
+      getDraftList();
     } else {
       message(response.message, { type: "error" });
     }

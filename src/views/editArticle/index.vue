@@ -5,10 +5,11 @@ import Check from "@iconify-icons/ep/check";
 import Close from "@/assets/svg/close.svg?component";
 import { useRenderIcon } from "@/components/ReIcon/src/hooks";
 import Upload from "@/components/ReUpload/index.vue";
-import { reactive, ref, onMounted } from "vue";
+import { reactive, ref, onMounted, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import type { UploadUserFile, FormInstance } from "element-plus";
 import { MdEditor } from "md-editor-v3";
+import type { Themes } from "md-editor-v3";
 import "md-editor-v3/lib/style.css";
 import {
   getArticle,
@@ -25,9 +26,11 @@ import { getTagList } from "@/api/tag";
 import { uploadFiles } from "@/api/file";
 import { message } from "@/utils/message";
 import { uploadFile } from "@/utils/upload";
+import { useDataThemeChange } from "@/layout/hooks/useDataThemeChange";
 defineOptions({
   name: "EditArticle"
 });
+const { layoutTheme } = useDataThemeChange();
 const route = useRoute();
 const router = useRouter();
 const dialogVisible = ref<boolean>(false);
@@ -53,8 +56,22 @@ const articleForm = reactive<ArticleInfo>({
 const categoryList = ref<any>();
 const tagList = ref<any>();
 const coverList = ref<UploadUserFile[]>([]);
-
+const mdTheme = ref<Themes>("light");
+watch(
+  () => layoutTheme.value.darkMode,
+  newValue => {
+    judgment(newValue);
+  }
+);
+const judgment = (theme: boolean) => {
+  if (theme) {
+    mdTheme.value = "dark";
+  } else {
+    mdTheme.value = "light";
+  }
+};
 onMounted(async () => {
+  judgment(layoutTheme.value.darkMode);
   // 文章
   if (route.query.id && !route.query.status) {
     await getArticle({ id: route.query.id }).then(response => {
@@ -272,6 +289,7 @@ const savaDraft = (formEl: FormInstance | undefined) => {
         </div>
       </template>
       <MdEditor
+        :theme="mdTheme"
         style="height: 72vh"
         v-model="articleForm.articleContent"
         @onUploadImg="onUploadImg"
