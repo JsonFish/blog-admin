@@ -102,7 +102,7 @@
         >
           <Upload
             multiple
-            :limit="2"
+            :limit="4"
             :fileList="imageList"
             @getFileList="getFile"
           />

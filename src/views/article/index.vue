@@ -79,7 +79,7 @@ const tabClick = (tabPane: TabsPaneContext) => {
 
 // 编辑文章
 const updateArticle = (id: number) => {
-  router.push({ path: "/article", query: { id } });
+  router.push({ path: "/article/edit", query: { id } });
 };
 
 // 编辑草稿
@@ -146,7 +146,6 @@ const deleteDraftBtn = (id: number) => {
         <el-form :model="queryParams" :inline="true" ref="queryFormRef">
           <el-form-item label="标题">
             <el-input
-              clearable
               v-model="queryParams.articleTitle"
               placeholder="请输入文章标题"
               prop="articleTitle"
