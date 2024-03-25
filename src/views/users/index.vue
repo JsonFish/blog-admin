@@ -72,7 +72,12 @@
             }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="ip" align="center" label="ip" min-width="100" />
+        <el-table-column
+          prop="ipAddress"
+          align="center"
+          label="ip"
+          min-width="100"
+        />
         <el-table-column
           prop="create_time"
           align="center"

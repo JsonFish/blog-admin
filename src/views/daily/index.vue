@@ -13,12 +13,12 @@
           >
         </div>
       </template>
-      <el-row>
-        <el-col v-for="item in dynamicList" :span="6" :key="item.id">
+      <el-row style="display: flex; justify-content: space-around">
+        <div v-for="item in dynamicList" :key="item.id">
           <el-card
             shadow="always"
-            body-style="padding:10px"
-            style="margin: 5px"
+            style="width: 355px"
+            body-style="height: 220px"
           >
             <template #header>
               <div style="display: flex; align-items: center">
@@ -49,13 +49,13 @@
               </div>
             </template>
           </el-card>
-        </el-col>
+        </div>
       </el-row>
       <template #footer>
         <el-pagination
           v-model:current-page="queryParams.currentPage"
           v-model:page-size="queryParams.pageSize"
-          :page-sizes="[8, 12, 16]"
+          :page-sizes="[6, 9, 15]"
           :small="true"
           background
           layout="->,total, sizes, prev, pager, next,jumper"
@@ -102,9 +102,10 @@
         >
           <Upload
             multiple
-            :limit="4"
+            :limit="2"
             :fileList="imageList"
             @getFileList="getFile"
+            :fileSize="4"
           />
         </el-form-item>
       </el-form>
@@ -145,7 +146,7 @@ const name = ref<string>();
 const total = ref<number>();
 const queryParams = reactive<any>({
   currentPage: 1,
-  pageSize: 8
+  pageSize: 6
 });
 onMounted(() => {
   getDynamicList();
@@ -210,10 +211,21 @@ const deleteBtn = (id: number) => {
 </script>
 
 <style scoped>
+.el-card {
+  margin: 5px;
+}
 .card-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
+/* .dialog {
+  width: 30% !important;
+}
+@media screen and (max-width: 750px) {
+  .el-dialog {
+    --el-dialog-width: 100vw;
+    margin: 0 auto;
+  }
+} */
 </style>
-@/api/daily@/api/daily/type

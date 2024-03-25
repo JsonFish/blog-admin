@@ -124,7 +124,7 @@ const agreeApply = (row: MessageInfo) => {
               </template>
             </el-table-column>
             <el-table-column
-              prop="message"
+              prop="text"
               align="center"
               label="留言内容"
               min-width="200"
