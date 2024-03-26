@@ -11,67 +11,38 @@ function init() {
   const myChart = echarts.init(main.value);
   // 指定图表的配置项和数据
   const option = {
-    backgroundColor: "#2c343c",
-
-    title: {
-      text: "Customized Pie",
-      left: "center",
-      top: 20,
-      textStyle: {
-        color: "#ccc"
-      }
+    legend: {
+      top: "bottom"
     },
-
-    tooltip: {
-      trigger: "item"
-    },
-
-    visualMap: {
-      show: false,
-      min: 80,
-      max: 600,
-      inRange: {
-        colorLightness: [0, 1]
+    toolbox: {
+      show: true,
+      feature: {
+        mark: { show: true },
+        dataView: { show: true, readOnly: false },
+        restore: { show: true },
+        saveAsImage: { show: true }
       }
     },
     series: [
       {
-        name: "Access From",
+        name: "Nightingale Chart",
         type: "pie",
-        radius: "55%",
+        radius: [50, 250],
         center: ["50%", "50%"],
-        data: [
-          { value: 335, name: "Direct" },
-          { value: 310, name: "Email" },
-          { value: 274, name: "Union Ads" },
-          { value: 235, name: "Video Ads" },
-          { value: 400, name: "Search Engine" }
-        ].sort(function (a, b) {
-          return a.value - b.value;
-        }),
-        roseType: "radius",
-        label: {
-          color: "rgba(255, 255, 255, 0.3)"
-        },
-        labelLine: {
-          lineStyle: {
-            color: "rgba(255, 255, 255, 0.3)"
-          },
-          smooth: 0.2,
-          length: 10,
-          length2: 20
-        },
+        roseType: "area",
         itemStyle: {
-          color: "#c23531",
-          shadowBlur: 200,
-          shadowColor: "rgba(0, 0, 0, 0.5)"
+          borderRadius: 8
         },
-
-        animationType: "scale",
-        animationEasing: "elasticOut",
-        animationDelay: function () {
-          return Math.random() * 200;
-        }
+        data: [
+          { value: 40, name: "rose 1" },
+          { value: 36, name: "rose 2" },
+          { value: 32, name: "rose 3" },
+          { value: 30, name: "rose 4" },
+          { value: 28, name: "rose 5" },
+          { value: 26, name: "rose 6" },
+          { value: 22, name: "rose 7" },
+          { value: 18, name: "rose 8" }
+        ]
       }
     ]
   };
@@ -83,7 +54,7 @@ function init() {
 <template>
   <el-card shadow="always" :body-style="{ padding: '20px' }">
     <template #header> 首页 </template>
-    <div ref="main" style="width: 200px; height: 200px" />
+    <div ref="main" style="width: 100%; height: 600px" />
   </el-card>
 </template>
 
