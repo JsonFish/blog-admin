@@ -223,6 +223,9 @@ onBeforeUnmount(() => {
         </div>
       </div>
     </div>
+    <div class="link">
+      <el-link href="https://beian.miit.gov.cn">豫IP备2024057248号</el-link>
+    </div>
   </div>
 </template>
 
@@ -233,5 +236,12 @@ onBeforeUnmount(() => {
 <style lang="scss" scoped>
 :deep(.el-input-group__append, .el-input-group__prepend) {
   padding: 0;
+}
+.link {
+  width: 100%;
+  position: fixed;
+  bottom: 0;
+  // background-color: pink;
+  text-align: center;
 }
 </style>
