@@ -12,12 +12,12 @@ import { MdEditor } from "md-editor-v3";
 import type { Themes } from "md-editor-v3";
 import "md-editor-v3/lib/style.css";
 import {
-  getArticle,
   addArticle,
   getDraft,
   addDraft,
   updateArticle,
-  updateDraft
+  updateDraft,
+  getArticleInfo
 } from "@/api/article";
 import type { ArticleInfo } from "@/api/article/type";
 import type { UrlInfo } from "@/api/file/type";
@@ -74,15 +74,17 @@ onMounted(async () => {
   judgment(layoutTheme.value.darkMode);
   // 文章
   if (route.query.id && !route.query.status) {
-    await getArticle({ id: route.query.id }).then(response => {
-      delete response.data.articleList[0].create_time;
-      delete response.data.articleList[0].update_time;
-      delete response.data.articleList[0].categoryName;
-      delete response.data.articleList[0].tags;
-      delete response.data.articleList[0].browse;
-      delete response.data.articleList[0].upvote;
-      Object.assign(articleForm, response.data.articleList[0]);
-    });
+    await getArticleInfo({ id: route.query.id as unknown as number }).then(
+      response => {
+        delete response.data.create_time;
+        delete response.data.update_time;
+        delete response.data.categoryName;
+        delete response.data.tags;
+        delete response.data.browse;
+        delete response.data.upvote;
+        Object.assign(articleForm, response.data);
+      }
+    );
   }
   // 草稿
   if (route.query.id && route.query.status) {

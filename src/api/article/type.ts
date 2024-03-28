@@ -32,9 +32,7 @@ export interface ArticleInfo {
   update_time?: string;
   upvote?: number;
 }
-/**
- * Request
- */
+
 export interface Tag {
   tagName: string;
 }

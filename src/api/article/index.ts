@@ -2,17 +2,23 @@ import { http } from "@/utils/http";
 import type { QueryParams, ArticleData, ArticleInfo } from "./type";
 enum Path {
   Article = "/article",
+  Information = "/article/infor",
   Draft = "/article/draft",
   Status = "/article/status"
 }
 
-// 获取文章列表
+// 获取文章
 export const getArticle = (params: QueryParams) => {
   return http.request<BasicResponse<ArticleData>>("get", Path.Article, {
     params
   });
 };
-
+// 获取文章详情
+export const getArticleInfo = (params: { id: number }) => {
+  return http.request<BasicResponse<ArticleInfo>>("get", Path.Information, {
+    params
+  });
+};
 // 新增文章
 export const addArticle = (data: ArticleInfo) => {
   return http.request<BasicResponse>("post", Path.Article, { data });

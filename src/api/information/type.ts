@@ -13,4 +13,6 @@ export interface Information {
   weChatGroup: string;
   weChatLink: string;
   weChatPay: string;
+  webSiteBg: string;
+  loginBg: string;
 }

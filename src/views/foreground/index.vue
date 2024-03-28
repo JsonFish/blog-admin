@@ -48,7 +48,7 @@
           :hiddenDelete="hiddenDeleteBtn"
         />
       </el-descriptions-item>
-      <el-descriptions-item label="背景图片" :span="1">
+      <el-descriptions-item label="头像背景" :span="1">
         <div class="background">
           <Upload
             v-model:fileList="backgroundImage"
@@ -106,6 +106,26 @@
           :hiddenDelete="hiddenDeleteBtn"
         />
       </el-descriptions-item>
+      <el-descriptions-item label="网站背景" :span="1">
+        <div class="background">
+          <Upload
+            v-model:fileList="webSiteBgImage"
+            @getFileList="getFileList"
+            :fileSize="2"
+            :hiddenDelete="hiddenDeleteBtn"
+          />
+        </div>
+      </el-descriptions-item>
+      <el-descriptions-item label="登录背景" :span="1">
+        <div class="background">
+          <Upload
+            v-model:fileList="loginBgImage"
+            @getFileList="getFileList"
+            :fileSize="2"
+            :hiddenDelete="hiddenDeleteBtn"
+          />
+        </div>
+      </el-descriptions-item>
     </el-descriptions>
   </el-card>
 </template>
@@ -124,6 +144,8 @@ const qqGroupImage = ref<UploadUserFile[]>([]);
 const weChatGroupImage = ref<UploadUserFile[]>([]);
 const weChatPayImage = ref<UploadUserFile[]>([]);
 const aliPayImage = ref<UploadUserFile[]>([]);
+const webSiteBgImage = ref<UploadUserFile[]>([]);
+const loginBgImage = ref<UploadUserFile[]>([]);
 const edit = ref<boolean>(false);
 const hiddenDeleteBtn = ref<boolean>(true);
 const information = ref<Information>({
@@ -140,7 +162,9 @@ const information = ref<Information>({
   qqGroup: "", // qq群
   weChatLink: "", // 微信
   aliPay: "", //  支付宝收款码
-  weChatPay: "" // 微信收款
+  weChatPay: "", // 微信收款
+  webSiteBg: "", // 网站背景
+  loginBg: "" //登录页背景
 });
 onMounted(() => {
   getInformation();
@@ -179,6 +203,14 @@ const getInformation = () => {
     weChatPayImage.value[0] = {
       name: "avatar",
       url: information.value.weChatPay
+    };
+    webSiteBgImage.value[0] = {
+      name: "avatar",
+      url: information.value.webSiteBg
+    };
+    loginBgImage.value[0] = {
+      name: "avatar",
+      url: information.value.webSiteBg
     };
   });
 };
