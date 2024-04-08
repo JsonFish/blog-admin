@@ -97,7 +97,7 @@ onMounted(async () => {
     });
   }
   await getCategoryList().then(response => {
-    categoryList.value = response.data.categoryList;
+    categoryList.value = response.data;
   });
   await getTagList().then(response => {
     tagList.value = response.data.tagList;

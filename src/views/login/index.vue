@@ -24,6 +24,7 @@ import Email from "@iconify-icons/ri/mail-line";
 // import { useUserMedia } from "@vueuse/core";
 import { useUserStore } from "@/store/modules/user";
 import { getCaptcha } from "@/api/login";
+import type { LoginParmars } from "@/api/login/type";
 defineOptions({
   name: "Login"
 });
@@ -39,19 +40,17 @@ dataThemeChange();
 // const { title } = useNav();
 // 图片验证码 base64格式
 const captchaImage = ref<string>();
-const loginForm = reactive({
+const loginForm = reactive<LoginParmars>({
   email: "test@qq.com",
   password: "123456",
-  code: "",
-  captchaId: ""
+  code: ""
 });
 
 // 获取图片验证码
 const getCaptchaImg = async () => {
   loginForm.code = "";
-  const result: any = await getCaptcha();
+  const result: BasicResponse = await getCaptcha();
   captchaImage.value = `data:image/jpg;base64,${result.data.imageBase64}`;
-  loginForm.captchaId = result.data.id;
 };
 
 // 图片验证码防抖
@@ -77,7 +76,10 @@ const onLogin = async (formEl: FormInstance | undefined) => {
         .loginByEmail(loginForm)
         .then(
           response => {
-            console.log(response);
+            if (response.code != 200) {
+              return;
+            }
+
             // 静态路由模式
             usePermissionStoreHook().handleWholeMenus([]);
             addPathMatch();
