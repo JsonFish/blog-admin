@@ -226,7 +226,9 @@ onBeforeUnmount(() => {
       </div>
     </div>
     <div class="link">
-      <el-link href="https://beian.miit.gov.cn">豫IP备2024057248号</el-link>
+      <el-link :underline="false" href="https://beian.miit.gov.cn"
+        >豫IP备2024057248号</el-link
+      >
     </div>
   </div>
 </template>
@@ -243,7 +245,6 @@ onBeforeUnmount(() => {
   width: 100%;
   position: fixed;
   bottom: 0;
-  // background-color: pink;
   text-align: center;
 }
 </style>
