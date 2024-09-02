@@ -4,40 +4,49 @@
       <template #header>
         <div>标签管理</div>
       </template>
-      <el-row>
-        <el-form :model="queryParams" :inline="true" ref="queryFormRef">
-          <el-form-item label="标签名称">
-            <el-input
-              v-model="queryParams.tagName"
-              placeholder="请输入标签名称"
-              prop="tagName"
-            />
-          </el-form-item>
-        </el-form>
-        <el-button
-          :disabled="!queryParams.tagName"
-          type="primary"
-          :icon="useRenderIcon(Search)"
-          @click="getTagInfo"
-          >搜索</el-button
-        >
-        <el-button type="info" :icon="useRenderIcon(Refresh)" @click="reset"
-          >重置</el-button
-        >
-        <el-button
-          type="primary"
-          :icon="useRenderIcon(Plus)"
-          @click="dialogVisible = true"
-          >新增</el-button
-        >
-        <el-button
-          :disabled="idList.length > 0 ? false : true"
-          type="danger"
-          :icon="useRenderIcon(Delete)"
-          @click="deleteTagBtn"
-          >批量删除</el-button
-        >
-      </el-row>
+      <el-form :model="queryParams" :inline="true" ref="queryFormRef">
+        <el-form-item label="标签名称">
+          <el-input
+            v-model="queryParams.tagName"
+            placeholder="请输入标签名称"
+            prop="tagName"
+            size="small"
+          />
+        </el-form-item>
+        <el-form-item>
+          <el-button
+            :disabled="!queryParams.tagName"
+            type="primary"
+            :icon="useRenderIcon(Search)"
+            @click="getTagInfo"
+            size="small"
+            >搜索</el-button
+          >
+          <el-button
+            type="info"
+            :icon="useRenderIcon(Refresh)"
+            @click="reset"
+            size="small"
+            >重置</el-button
+          >
+          <el-button
+            type="primary"
+            :icon="useRenderIcon(Plus)"
+            @click="dialogVisible = true"
+            size="small"
+            >新增</el-button
+          >
+          <el-button
+            :disabled="idList.length > 0 ? false : true"
+            type="danger"
+            :icon="useRenderIcon(Delete)"
+            @click="deleteTagBtn"
+            size="small"
+            >批量删除</el-button
+          >
+        </el-form-item>
+      </el-form>
+
       <el-table
         stripe
         v-loading="loading"
@@ -72,6 +81,7 @@
               <el-button
                 link
                 type="primary"
+                size="small"
                 @click="updateBtn(scope.row)"
                 :icon="useRenderIcon(EditPen)"
                 >修改</el-button
@@ -84,7 +94,11 @@
                 @confirm="deleteTagBtn(scope.row)"
               >
                 <template #reference>
-                  <el-button link type="danger" :icon="useRenderIcon(Delete)"
+                  <el-button
+                    link
+                    type="danger"
+                    :icon="useRenderIcon(Delete)"
+                    size="small"
                     >删除</el-button
                   >
                 </template>

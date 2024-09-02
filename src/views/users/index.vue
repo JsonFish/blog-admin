@@ -13,6 +13,7 @@
         >
           <el-form-item label="用户名">
             <el-input
+              size="small"
               clearable
               v-model="queryParams.username"
               placeholder="请输入用户名"
@@ -100,6 +101,7 @@
               :inactive-value="0"
               inactive-text="正常"
               active-text="拉黑"
+              size="small"
             />
           </template>
         </el-table-column>
@@ -111,6 +113,7 @@
                 type="primary"
                 :icon="useRenderIcon(EditPen)"
                 @click="updateBtn(scope.row)"
+                size="small"
                 >修改</el-button
               >
             </div>

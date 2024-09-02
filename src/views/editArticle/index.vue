@@ -276,6 +276,7 @@ const savaDraft = (formEl: FormInstance | undefined) => {
               :icon="useRenderIcon(Files)"
               type="info"
               @click="openDialog"
+              size="small"
               >{{ articleForm.status == 2 ? "保存" : "存草稿" }}</el-link
             >
             <el-button
@@ -283,6 +284,7 @@ const savaDraft = (formEl: FormInstance | undefined) => {
               :icon="useRenderIcon(Promotion)"
               type="primary"
               @click="openDrawer"
+              size="small"
               >{{
                 articleForm.id && articleForm.status != 2 ? "更新" : "发布"
               }}</el-button

@@ -2,11 +2,24 @@
   <el-card>
     <el-descriptions title="前台信息" direction="vertical" :column="4" border>
       <template #extra>
-        <el-button v-show="edit" plain type="primary" @click="updateBtn"
+        <el-button
+          size="small"
+          v-show="edit"
+          plain
+          type="primary"
+          @click="updateBtn"
           >保存</el-button
         >
-        <el-button v-show="edit" plain @click="cancel">取消</el-button>
-        <el-button v-show="!edit" plain type="primary" @click="editInformation">
+        <el-button size="small" v-show="edit" plain @click="cancel"
+          >取消</el-button
+        >
+        <el-button
+          size="small"
+          v-show="!edit"
+          plain
+          type="primary"
+          @click="editInformation"
+        >
           修改
         </el-button>
       </template>

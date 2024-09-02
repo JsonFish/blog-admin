@@ -8,35 +8,45 @@
         <el-form :model="queryParams" :inline="true" ref="queryFormRef">
           <el-form-item label="分类名称">
             <el-input
+              size="small"
               v-model="queryParams.categoryName"
               placeholder="请输入分类名称"
               prop="categoryName"
             />
           </el-form-item>
+          <el-form-item>
+            <el-button
+              :disabled="!queryParams.categoryName"
+              type="primary"
+              :icon="useRenderIcon(Search)"
+              @click="getCategoryInfo"
+              size="small"
+              >搜索</el-button
+            >
+            <el-button
+              type="info"
+              :icon="useRenderIcon(Refresh)"
+              @click="reset"
+              size="small"
+              >重置</el-button
+            >
+            <el-button
+              type="primary"
+              size="small"
+              :icon="useRenderIcon(Plus)"
+              @click="dialogVisible = true"
+              >新增</el-button
+            >
+            <el-button
+              :disabled="idList.length > 0 ? false : true"
+              type="danger"
+              :icon="useRenderIcon(Delete)"
+              @click="deleteBtn"
+              size="small"
+              >批量删除</el-button
+            >
+          </el-form-item>
         </el-form>
-        <el-button
-          :disabled="!queryParams.categoryName"
-          type="primary"
-          :icon="useRenderIcon(Search)"
-          @click="getCategoryInfo"
-          >搜索</el-button
-        >
-        <el-button type="info" :icon="useRenderIcon(Refresh)" @click="reset"
-          >重置</el-button
-        >
-        <el-button
-          type="primary"
-          :icon="useRenderIcon(Plus)"
-          @click="dialogVisible = true"
-          >新增</el-button
-        >
-        <el-button
-          :disabled="idList.length > 0 ? false : true"
-          type="danger"
-          :icon="useRenderIcon(Delete)"
-          @click="deleteBtn"
-          >批量删除</el-button
-        >
       </el-row>
       <el-table
         size="small"
@@ -92,6 +102,7 @@
                 type="primary"
                 @click="updateBtn(scope.row)"
                 :icon="useRenderIcon(EditPen)"
+                size="small"
                 >修改</el-button
               >
               <el-popconfirm
@@ -102,7 +113,11 @@
                 @confirm="deleteBtn(scope.row)"
               >
                 <template #reference>
-                  <el-button link type="danger" :icon="useRenderIcon(Delete)"
+                  <el-button
+                    link
+                    type="danger"
+                    :icon="useRenderIcon(Delete)"
+                    size="small"
                     >删除</el-button
                   >
                 </template>

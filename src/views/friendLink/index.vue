@@ -318,6 +318,7 @@ const deleteBtn = (row: LinkInfo | any) => {
                     type="primary"
                     @click="updateBtn(scope.row)"
                     :icon="useRenderIcon(EditPen)"
+                    size="small"
                     >修改</el-button
                   >
                   <el-popconfirm
@@ -332,6 +333,7 @@ const deleteBtn = (row: LinkInfo | any) => {
                         link
                         type="danger"
                         :icon="useRenderIcon(Delete)"
+                        size="small"
                         >删除</el-button
                       >
                     </template>
@@ -409,6 +411,7 @@ const deleteBtn = (row: LinkInfo | any) => {
                         link
                         type="primary"
                         :icon="useRenderIcon(Check)"
+                        size="small"
                         >同意</el-button
                       >
                     </template>
@@ -422,7 +425,11 @@ const deleteBtn = (row: LinkInfo | any) => {
                     @confirm="deleteBtn(scope.row)"
                   >
                     <template #reference>
-                      <el-button link type="danger" :icon="useRenderIcon(Close)"
+                      <el-button
+                        link
+                        type="danger"
+                        :icon="useRenderIcon(Close)"
+                        size="small"
                         >拒绝</el-button
                       >
                     </template>

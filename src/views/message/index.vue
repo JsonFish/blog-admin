@@ -145,7 +145,11 @@ const agreeApply = (row: MessageInfo) => {
                   @confirm="deleteBtn(scope.row)"
                 >
                   <template #reference>
-                    <el-button link type="danger" :icon="useRenderIcon(Delete)"
+                    <el-button
+                      link
+                      type="danger"
+                      :icon="useRenderIcon(Delete)"
+                      size="small"
                       >删除</el-button
                     >
                   </template>
@@ -211,7 +215,11 @@ const agreeApply = (row: MessageInfo) => {
                   @confirm="deleteBtn(scope.row)"
                 >
                   <template #reference>
-                    <el-button link type="danger" :icon="useRenderIcon(Close)"
+                    <el-button
+                      link
+                      type="danger"
+                      :icon="useRenderIcon(Close)"
+                      size="small"
                       >删除</el-button
                     >
                   </template>

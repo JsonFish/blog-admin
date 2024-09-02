@@ -138,6 +138,7 @@ const deleteDraftBtn = (id: number) => {
             :icon="useRenderIcon(EditPen)"
             type="primary"
             text
+            size="small"
             >写文章</el-button
           >
         </div>
@@ -149,19 +150,27 @@ const deleteDraftBtn = (id: number) => {
               v-model="queryParams.articleTitle"
               placeholder="请输入文章标题"
               prop="articleTitle"
+              size="small"
             />
           </el-form-item>
+          <el-form-item>
+            <el-button
+              :disabled="!queryParams.articleTitle"
+              type="primary"
+              :icon="useRenderIcon(Search)"
+              @click="getArticleLsit"
+              size="small"
+              >搜索</el-button
+            >
+            <el-button
+              type="info"
+              :icon="useRenderIcon(Refresh)"
+              @click="reset"
+              size="small"
+              >重置</el-button
+            >
+          </el-form-item>
         </el-form>
-        <el-button
-          :disabled="!queryParams.articleTitle"
-          type="primary"
-          :icon="useRenderIcon(Search)"
-          @click="getArticleLsit"
-          >搜索</el-button
-        >
-        <el-button type="info" :icon="useRenderIcon(Refresh)" @click="reset"
-          >重置</el-button
-        >
       </el-row>
       <el-tabs :model-value="0" @tab-click="tabClick">
         <el-tab-pane label="已发布" :name="0">
